@@ -316,7 +316,7 @@
     </div>
 
     <div class="note-section">
-        <textarea class="note-input" id="noteInput" rows="2" placeholder="📝 Заметка (необязательно). Например: опоздал на 10 минут, был на обеде, встреча с клиентом..."></textarea>
+        <textarea class="note-input" id="noteInput" rows="2" placeholder="📝 Заметка (необязательно)"></textarea>
     </div>
 
     <div class="stats-bar">
@@ -484,46 +484,92 @@
             }
         }
 
-        function renderHistory() {
-            const container = document.getElementById('logContainer');
-            const counterSpan = document.getElementById('counter');
-            const todayStatsSpan = document.getElementById('todayStats');
-            
-            const total = history.length;
-            counterSpan.textContent = `${total} ${total === 1 ? 'запись' : (total >= 2 && total <= 4 ? 'записи' : 'записей')}`;
-            todayStatsSpan.textContent = calculateTodayWorkHours();
-            
-            if (total === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <span>📭</span>
-                        История пуста<br>
-                        Нажми «ПРИХОД» или «УХОД»
-                    </div>
-                `;
-                return;
+       function renderHistory() {
+    const container = document.getElementById('logContainer');
+    const counterSpan = document.getElementById('counter');
+    const todayStatsSpan = document.getElementById('todayStats');
+    
+    const total = history.length;
+    counterSpan.textContent = `${total} ${total === 1 ? 'запись' : (total >= 2 && total <= 4 ? 'записи' : 'записей')}`;
+    todayStatsSpan.textContent = calculateTodayWorkHours();
+    
+    if (total === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span>📭</span>
+                История пуста<br>
+                Нажми «ПРИХОД» или «УХОД»
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    history.forEach((record, index) => {
+        const recordNumber = history.length - index;
+        const typeClass = record.type === 'arrive' ? 'arrive' : 'leave';
+        const typeText = record.type === 'arrive' ? '🏢 ПРИХОД' : '🏠 УХОД';
+        
+        html += `
+            <div class="log-item ${typeClass}" data-id="${record.id}">
+                <div class="log-header">
+                    <span class="log-type ${typeClass}">${typeText} #${recordNumber}</span>
+                    <span class="log-time">⏰ ${record.time}</span>
+                </div>
+                <div class="log-date">📅 ${record.date}</div>
+                ${record.note ? `<div class="log-note">📝 ${escapeHtml(record.note)}</div>` : ''}
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    
+    // Добавляем возможность удалять записи по долгому нажатию (на iPhone)
+    const items = document.querySelectorAll('.log-item');
+    items.forEach(item => {
+        let pressTimer;
+        
+        // Долгое нажатие на iOS
+        item.addEventListener('touchstart', (e) => {
+            pressTimer = setTimeout(() => {
+                const id = parseInt(item.getAttribute('data-id'));
+                if (confirm('🗑 Удалить эту запись?')) {
+                    deleteRecordById(id);
+                }
+            }, 500);
+        });
+        
+        item.addEventListener('touchend', () => {
+            clearTimeout(pressTimer);
+        });
+        
+        item.addEventListener('touchmove', () => {
+            clearTimeout(pressTimer);
+        });
+        
+        // Для мыши (если тестируешь на компьютере)
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const id = parseInt(item.getAttribute('data-id'));
+            if (confirm('🗑 Удалить эту запись?')) {
+                deleteRecordById(id);
             }
-            
-            let html = '';
-            history.forEach((record, index) => {
-                const recordNumber = history.length - index;
-                const typeClass = record.type === 'arrive' ? 'arrive' : 'leave';
-                const typeText = record.type === 'arrive' ? '🏢 ПРИХОД' : '🏠 УХОД';
-                
-                html += `
-                    <div class="log-item ${typeClass}">
-                        <div class="log-header">
-                            <span class="log-type ${typeClass}">${typeText} #${recordNumber}</span>
-                            <span class="log-time">⏰ ${record.time}</span>
-                        </div>
-                        <div class="log-date">📅 ${record.date}</div>
-                        ${record.note ? `<div class="log-note">📝 ${escapeHtml(record.note)}</div>` : ''}
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
+        });
+    });
+}
+
+// Добавляем функцию удаления по ID
+function deleteRecordById(id) {
+    const index = history.findIndex(record => record.id === id);
+    if (index !== -1) {
+        history.splice(index, 1);
+        saveHistory();
+        renderHistory();
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(50);
         }
+    }
+}
 
         function escapeHtml(text) {
             const div = document.createElement('div');
