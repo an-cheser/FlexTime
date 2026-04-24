@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1e293b">
-    <title>TimeLogger — история нажатий</title>
+    <title>FlexTime — учёт гибкого рабочего времени</title>
     <style>
         * {
             margin: 0;
@@ -16,10 +15,10 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             min-height: 100vh;
             padding: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
             touch-action: manipulation;
         }
 
@@ -30,12 +29,10 @@
             border-radius: 32px;
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            position: relative;
         }
 
-        /* Хедер */
         .header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(135deg, #1a472a, #0d2818);
             color: white;
             padding: 24px 20px;
             text-align: center;
@@ -44,80 +41,111 @@
         .header h1 {
             font-size: 28px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
             margin-bottom: 8px;
         }
 
         .header p {
             font-size: 14px;
-            opacity: 0.8;
+            opacity: 0.85;
         }
 
-        /* Основная кнопка */
-        .big-button-container {
-            padding: 30px 20px;
-            background: linear-gradient(to bottom, #f8fafc, #ffffff);
+        /* Кнопки действий */
+        .action-buttons {
+            padding: 20px 20px 10px;
+            display: flex;
+            gap: 12px;
         }
 
-        .record-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .action-btn {
+            flex: 1;
+            padding: 20px 12px;
             border: none;
-            padding: 28px 20px;
-            border-radius: 80px;
-            color: white;
-            font-size: 24px;
+            border-radius: 60px;
+            font-size: 18px;
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.1s ease;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.1s ease;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        .record-btn:active {
+        .action-btn:active {
             transform: scale(0.97);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
-        /* Статистика */
+        .btn-arrive {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .btn-leave {
+            background: linear-gradient(135deg, #ee0979, #ff6a00);
+            color: white;
+            box-shadow: 0 4px 15px rgba(238, 9, 121, 0.3);
+        }
+
+        /* Поле для заметок */
+        .note-section {
+            padding: 10px 20px 20px;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 28px;
+            font-size: 15px;
+            font-family: inherit;
+            background: #f8fafc;
+            transition: all 0.2s;
+            resize: none;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: #11998e;
+            background: white;
+        }
+
         .stats-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 20px;
+            padding: 12px 20px;
             background: #f1f5f9;
             border-top: 1px solid #e2e8f0;
             border-bottom: 1px solid #e2e8f0;
         }
 
         .count-badge {
-            background: #667eea;
+            background: #2c5364;
             color: white;
             padding: 6px 16px;
             border-radius: 40px;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
+        }
+
+        .today-stats {
+            font-size: 13px;
+            color: #1a472a;
+            font-weight: 500;
         }
 
         .clear-btn {
             background: white;
             border: 1px solid #cbd5e1;
-            padding: 8px 20px;
+            padding: 6px 16px;
             border-radius: 40px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: #ef4444;
             cursor: pointer;
             transition: all 0.2s;
-            touch-action: manipulation;
         }
 
         .clear-btn:active {
@@ -125,7 +153,6 @@
             transform: scale(0.96);
         }
 
-        /* Список записей */
         .history-section {
             padding: 20px;
             background: white;
@@ -142,7 +169,7 @@
         }
 
         .log-container {
-            max-height: 450px;
+            max-height: 400px;
             overflow-y: auto;
             border-radius: 20px;
             background: #f8fafc;
@@ -150,59 +177,65 @@
 
         .log-item {
             background: white;
-            padding: 16px;
+            padding: 14px;
             margin: 8px;
             border-radius: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.2s;
-            touch-action: manipulation;
+            border-left: 5px solid;
         }
 
-        .log-item:active {
-            background: #f1f5f9;
-            transform: scale(0.99);
+        .log-item.arrive {
+            border-left-color: #11998e;
         }
 
-        .log-number {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 50%;
+        .log-item.leave {
+            border-left-color: #ee0979;
+        }
+
+        .log-header {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .log-type {
             font-weight: 700;
-            font-size: 16px;
-            flex-shrink: 0;
+            font-size: 14px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            background: #f1f5f9;
         }
 
-        .log-info {
-            flex: 1;
+        .log-type.arrive {
+            color: #11998e;
         }
 
-        .log-date {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 4px;
+        .log-type.leave {
+            color: #ee0979;
         }
 
         .log-time {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: #667eea;
             font-family: 'SF Mono', monospace;
-            letter-spacing: 0.5px;
+            color: #0f172a;
         }
 
-        .log-seconds {
+        .log-date {
             font-size: 13px;
             color: #64748b;
-            margin-top: 2px;
+        }
+
+        .log-note {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #475569;
+            font-style: italic;
         }
 
         .empty-state {
@@ -211,13 +244,6 @@
             color: #94a3b8;
         }
 
-        .empty-state span {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 12px;
-        }
-
-        /* Экспорт */
         .export-section {
             padding: 16px 20px 24px;
             background: #f8fafc;
@@ -227,24 +253,22 @@
         .export-btn {
             width: 100%;
             background: white;
-            border: 2px solid #667eea;
+            border: 2px solid #2c5364;
             padding: 14px;
             border-radius: 60px;
             font-size: 16px;
             font-weight: 600;
-            color: #667eea;
+            color: #2c5364;
             cursor: pointer;
             transition: all 0.2s;
-            touch-action: manipulation;
         }
 
         .export-btn:active {
-            background: #667eea;
+            background: #2c5364;
             color: white;
             transform: scale(0.97);
         }
 
-        /* Скролл */
         .log-container::-webkit-scrollbar {
             width: 6px;
         }
@@ -255,338 +279,279 @@
         }
 
         .log-container::-webkit-scrollbar-thumb {
-            background: #667eea;
+            background: #2c5364;
             border-radius: 10px;
         }
 
-        /* Анимация при добавлении */
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateX(20px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
         }
 
-        .log-item.new {
-            animation: slideIn 0.3s ease;
+        .log-item {
+            animation: slideIn 0.2s ease;
         }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="header">
-        <h1>
-            📍 TimeLogger
-        </h1>
-        <p>Каждое нажатие сохраняется навсегда</p>
+        <h1>⏱️ FlexTime</h1>
+        <p>Учёт гибкого рабочего времени | Приход → Уход</p>
     </div>
 
-    <div class="big-button-container">
-        <button class="record-btn" id="recordBtn">
-            ✨ ЗАПИСАТЬ МОМЕНТ ✨
+    <div class="action-buttons">
+        <button class="action-btn btn-arrive" id="arriveBtn">
+            🏢 ПРИХОД
+        </button>
+        <button class="action-btn btn-leave" id="leaveBtn">
+            🏠 УХОД
         </button>
     </div>
 
+    <div class="note-section">
+        <textarea class="note-input" id="noteInput" rows="2" placeholder="📝 Заметка (необязательно). Например: опоздал на 10 минут, был на обеде, встреча с клиентом..."></textarea>
+    </div>
+
     <div class="stats-bar">
-        <span class="count-badge" id="counter">0 записей</span>
-        <button class="clear-btn" id="clearBtn">🗑 Очистить всё</button>
+        <div>
+            <span class="count-badge" id="counter">0 записей</span>
+        </div>
+        <div class="today-stats" id="todayStats">Сегодня: —</div>
+        <button class="clear-btn" id="clearBtn">🗑 Очистить</button>
     </div>
 
     <div class="history-section">
         <div class="history-title">
-            📜 История нажатий
+            📜 История событий
         </div>
         <div class="log-container" id="logContainer">
             <div class="empty-state">
                 <span>👆</span>
-                Нажми на большую кнопку<br>чтобы сохранить первый момент
+                Нажми «ПРИХОД» когда придёшь на работу<br>
+                Нажми «УХОД» когда уходишь
             </div>
         </div>
     </div>
 
     <div class="export-section">
         <button class="export-btn" id="exportBtn">
-            📤 Экспорт истории (CSV)
+            📤 Экспорт в CSV (для Excel / Google Sheets)
         </button>
     </div>
 </div>
 
 <script>
     (function() {
-        // Ключ для хранения в localStorage
-        const STORAGE_KEY = 'timelogger_history_ios';
-        
-        // Массив записей
-        let history = []; // каждая запись: { id, date, time, fullISO, timestamp }
-        
-        // Загрузка из localStorage
+        const STORAGE_KEY = 'flextime_logger';
+        let history = []; // { id, type, date, time, timestamp, note }
+
+        // Загрузка
         function loadHistory() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    if (Array.isArray(parsed)) {
-                        history = parsed;
-                    } else {
-                        history = [];
-                    }
-                } catch(e) {
-                    history = [];
-                }
+                    if (Array.isArray(parsed)) history = parsed;
+                    else history = [];
+                } catch(e) { history = []; }
             } else {
-                // Добавим демо-запись для примера (можно убрать)
                 history = [];
             }
         }
-        
-        // Сохранение в localStorage
+
         function saveHistory() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
         }
-        
-        // Получить текущую дату и время (с секундами)
+
         function getCurrentDateTime() {
             const now = new Date();
-            
-            // Дата: ДД.ММ.ГГГГ
             const day = String(now.getDate()).padStart(2, '0');
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const year = now.getFullYear();
             const dateStr = `${day}.${month}.${year}`;
-            
-            // Время: ЧЧ:ММ:СС
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const timeStr = `${hours}:${minutes}:${seconds}`;
-            
-            // Полная дата для сортировки
             const fullISO = now.toISOString();
             const timestamp = now.getTime();
-            
             return { dateStr, timeStr, fullISO, timestamp };
         }
-        
-        // Добавить новую запись
-        function addRecord() {
+
+        function addRecord(type) {
+            const note = document.getElementById('noteInput').value.trim();
             const { dateStr, timeStr, fullISO, timestamp } = getCurrentDateTime();
             
             const newRecord = {
                 id: Date.now() + Math.random(),
+                type: type, // 'arrive' или 'leave'
                 date: dateStr,
                 time: timeStr,
                 fullISO: fullISO,
-                timestamp: timestamp
+                timestamp: timestamp,
+                note: note || ''
             };
             
-            history.unshift(newRecord); // Добавляем в начало (свежие сверху)
+            history.unshift(newRecord);
             saveHistory();
             renderHistory();
             
-            // Виброотклик на iPhone (если поддерживается)
-            if (window.navigator && window.navigator.vibrate) {
-                window.navigator.vibrate(50);
-            }
-        }
-        
-        // Очистить всю историю
-        function clearHistory() {
-            if (history.length === 0) return;
-            
-            const confirmed = confirm('⚠️ Удалить ВСЮ историю нажатий? Отменить будет нельзя.');
-            if (confirmed) {
-                history = [];
-                saveHistory();
-                renderHistory();
-            }
-        }
-        
-        // Экспорт в CSV
-        function exportToCSV() {
-            if (history.length === 0) {
-                alert('Нет записей для экспорта');
-                return;
-            }
-            
-            // Создаём CSV
-            let csvContent = "\uFEFF№,Дата,Время,Полная дата\n"; // BOM для русских букв
-            history.forEach((record, index) => {
-                const row = `${history.length - index},${record.date},${record.time},${record.fullISO}`;
-                csvContent += row + "\n";
-            });
-            
-            // Создаём ссылку для скачивания
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            // Имя файла с текущей датой
-            const now = new Date();
-            const fileName = `timelog_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.csv`;
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', fileName);
-            link.style.display = 'none';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            // Очищаем поле заметок
+            document.getElementById('noteInput').value = '';
             
             // Виброотклик
             if (window.navigator && window.navigator.vibrate) {
                 window.navigator.vibrate(50);
             }
         }
-        
-        // Форматирование относительного времени (опционально)
-        function getRelativeTime(timestamp) {
-            const now = Date.now();
-            const diff = now - timestamp;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
+
+        // Подсчёт сегодняшнего рабочего времени
+        function calculateTodayWorkHours() {
+            const today = new Date().toLocaleDateString('ru-RU');
+            const todayEvents = history.filter(record => record.date === today);
             
-            if (minutes < 1) return 'только что';
-            if (minutes < 60) return `${minutes} мин назад`;
-            if (hours < 24) return `${hours} ч назад`;
-            if (days < 7) return `${days} дн назад`;
-            return null;
+            let lastArrive = null;
+            let totalMinutes = 0;
+            
+            for (let i = todayEvents.length - 1; i >= 0; i--) {
+                const event = todayEvents[i];
+                if (event.type === 'arrive') {
+                    lastArrive = event;
+                } else if (event.type === 'leave' && lastArrive) {
+                    const arriveTime = new Date(lastArrive.fullISO);
+                    const leaveTime = new Date(event.fullISO);
+                    const diffMinutes = (leaveTime - arriveTime) / 1000 / 60;
+                    if (diffMinutes > 0 && diffMinutes < 720) { // не больше 12 часов
+                        totalMinutes += diffMinutes;
+                    }
+                    lastArrive = null;
+                }
+            }
+            
+            if (totalMinutes > 0) {
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = Math.floor(totalMinutes % 60);
+                return `🕘 Сегодня: ${hours}ч ${minutes}м`;
+            }
+            return `🕘 Сегодня: —`;
         }
-        
-        // Отрисовка списка
+
+        function clearHistory() {
+            if (history.length === 0) return;
+            if (confirm('⚠️ Удалить ВСЮ историю? Отменить нельзя.')) {
+                history = [];
+                saveHistory();
+                renderHistory();
+            }
+        }
+
+        function exportToCSV() {
+            if (history.length === 0) {
+                alert('Нет записей для экспорта');
+                return;
+            }
+            
+            let csvContent = "\uFEFF№,Тип,Дата,Время,Заметка,Полная дата\n";
+            history.forEach((record, index) => {
+                const typeText = record.type === 'arrive' ? 'Приход' : 'Уход';
+                const row = `${history.length - index},"${typeText}",${record.date},${record.time},"${record.note.replace(/"/g, '""')}",${record.fullISO}`;
+                csvContent += row + "\n";
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            const now = new Date();
+            const fileName = `flextime_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+        }
+
         function renderHistory() {
             const container = document.getElementById('logContainer');
             const counterSpan = document.getElementById('counter');
+            const todayStatsSpan = document.getElementById('todayStats');
             
             const total = history.length;
             counterSpan.textContent = `${total} ${total === 1 ? 'запись' : (total >= 2 && total <= 4 ? 'записи' : 'записей')}`;
+            todayStatsSpan.textContent = calculateTodayWorkHours();
             
             if (total === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <span>📭</span>
                         История пуста<br>
-                        Нажми на большую кнопку
+                        Нажми «ПРИХОД» или «УХОД»
                     </div>
                 `;
                 return;
             }
             
-            // Рендерим записи (уже в правильном порядке, т.к. unshift)
             let html = '';
             history.forEach((record, index) => {
                 const recordNumber = history.length - index;
-                const relative = getRelativeTime(record.timestamp);
-                const relativeText = relative ? ` · ${relative}` : '';
+                const typeClass = record.type === 'arrive' ? 'arrive' : 'leave';
+                const typeText = record.type === 'arrive' ? '🏢 ПРИХОД' : '🏠 УХОД';
                 
                 html += `
-                    <div class="log-item" data-id="${record.id}">
-                        <div class="log-number">${recordNumber}</div>
-                        <div class="log-info">
-                            <div class="log-date">📅 ${record.date}</div>
-                            <div class="log-time">⏰ ${record.time}</div>
-                            <div class="log-seconds">${relativeText || 'сохранено'}</div>
+                    <div class="log-item ${typeClass}">
+                        <div class="log-header">
+                            <span class="log-type ${typeClass}">${typeText} #${recordNumber}</span>
+                            <span class="log-time">⏰ ${record.time}</span>
                         </div>
+                        <div class="log-date">📅 ${record.date}</div>
+                        ${record.note ? `<div class="log-note">📝 ${escapeHtml(record.note)}</div>` : ''}
                     </div>
                 `;
             });
             
             container.innerHTML = html;
-            
-            // Добавляем возможность удалить конкретную запись (долгое нажатие или свайп для iPhone)
-            // Для простоты сделаем долгий тап для удаления
-            const items = document.querySelectorAll('.log-item');
-            items.forEach(item => {
-                let pressTimer;
-                
-                item.addEventListener('touchstart', (e) => {
-                    pressTimer = setTimeout(() => {
-                        const id = parseInt(item.getAttribute('data-id'));
-                        if (confirm('Удалить эту запись?')) {
-                            deleteRecordById(id);
-                        }
-                    }, 500);
-                });
-                
-                item.addEventListener('touchend', () => {
-                    clearTimeout(pressTimer);
-                });
-                
-                item.addEventListener('touchmove', () => {
-                    clearTimeout(pressTimer);
-                });
-            });
         }
-        
-        // Удалить конкретную запись по ID
-        function deleteRecordById(id) {
-            const index = history.findIndex(record => record.id === id);
-            if (index !== -1) {
-                history.splice(index, 1);
-                saveHistory();
-                renderHistory();
-                if (window.navigator && window.navigator.vibrate) {
-                    window.navigator.vibrate(50);
-                }
-            }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-        
-        // Предотвращаем случайное масштабирование при двойном тапе (для лучшего UX)
-        document.addEventListener('touchstart', (e) => {
-            if (e.target.closest('.record-btn')) {
-                e.preventDefault(); // для предотвращения зума, но не всегда
-            }
-        }, { passive: false });
-        
-        // Инициализация
+
         function init() {
             loadHistory();
             renderHistory();
             
-            const recordBtn = document.getElementById('recordBtn');
-            const clearBtn = document.getElementById('clearBtn');
-            const exportBtn = document.getElementById('exportBtn');
+            document.getElementById('arriveBtn').addEventListener('click', () => addRecord('arrive'));
+            document.getElementById('leaveBtn').addEventListener('click', () => addRecord('leave'));
+            document.getElementById('clearBtn').addEventListener('click', clearHistory);
+            document.getElementById('exportBtn').addEventListener('click', exportToCSV);
             
-            if (recordBtn) {
-                recordBtn.addEventListener('click', addRecord);
-                recordBtn.addEventListener('touchstart', (e) => {
-                    // Небольшая задержка для лучшего отклика
-                    e.preventDefault();
-                    addRecord();
-                });
-            }
-            
-            if (clearBtn) {
-                clearBtn.addEventListener('click', clearHistory);
-                clearBtn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    clearHistory();
-                });
-            }
-            
-            if (exportBtn) {
-                exportBtn.addEventListener('click', exportToCSV);
-                exportBtn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    exportToCSV();
-                });
-            }
-            
-            // Добавляем поддержку клавиш (если есть клавиатура)
-            window.addEventListener('keydown', (e) => {
-                if (e.code === 'Space' || e.code === 'Enter') {
-                    e.preventDefault();
-                    addRecord();
+            // Для касаний на iPhone
+            ['arriveBtn', 'leaveBtn', 'clearBtn', 'exportBtn'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        btn.click();
+                    });
                 }
             });
         }
         
-        // Запускаем при загрузке
         init();
     })();
 </script>
