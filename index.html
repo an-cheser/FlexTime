@@ -484,7 +484,7 @@
             }
         }
 
-       function renderHistory() {
+function renderHistory() {
     const container = document.getElementById('logContainer');
     const counterSpan = document.getElementById('counter');
     const todayStatsSpan = document.getElementById('todayStats');
@@ -524,15 +524,15 @@
     
     container.innerHTML = html;
     
-    // Добавляем возможность удалять записи по долгому нажатию (на iPhone)
+    // НАВЕШИВАЕМ СОБЫТИЯ ПОСЛЕ ТОГО, КАК HTML ВСТАВИЛИ
     const items = document.querySelectorAll('.log-item');
     items.forEach(item => {
         let pressTimer;
         
-        // Долгое нажатие на iOS
+        // Долгое нажатие на iPhone
         item.addEventListener('touchstart', (e) => {
             pressTimer = setTimeout(() => {
-                const id = parseInt(item.getAttribute('data-id'));
+                const id = item.getAttribute('data-id');  // строка
                 if (confirm('🗑 Удалить эту запись?')) {
                     deleteRecordById(id);
                 }
@@ -547,10 +547,10 @@
             clearTimeout(pressTimer);
         });
         
-        // Для мыши (если тестируешь на компьютере)
+        // Для мыши (правый клик)
         item.addEventListener('contextmenu', (e) => {
             e.preventDefault();
-            const id = parseInt(item.getAttribute('data-id'));
+            const id = item.getAttribute('data-id');
             if (confirm('🗑 Удалить эту запись?')) {
                 deleteRecordById(id);
             }
@@ -558,16 +558,20 @@
     });
 }
 
-// Добавляем функцию удаления по ID
+// Функция удаления по ID (сравниваем как строки)
 function deleteRecordById(id) {
-    const index = history.findIndex(record => record.id === id);
+    // Преобразуем id в строку для надёжного сравнения
+    const stringId = String(id);
+    const index = history.findIndex(record => String(record.id) === stringId);
     if (index !== -1) {
         history.splice(index, 1);
         saveHistory();
-        renderHistory();
+        renderHistory();  // перерисовываем список
         if (window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(50);
         }
+    } else {
+        console.warn('Не найден ID для удаления:', id);
     }
 }
 
