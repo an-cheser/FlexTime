@@ -87,24 +87,32 @@ async function uploadToSheets() {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            mode: 'no-cors',  // ← добавляем для обхода CORS
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(h)
         });
-        alert('✅ Данные отправлены в Google Sheets (проверь таблицу через 5-10 секунд)');
+        const result = await response.json();
+        if (result.status === 'ok') {
+            alert('✅ Данные сохранены в Google Sheets');
+        } else {
+            alert('❌ Ошибка: ' + (result.error || 'неизвестная'));
+        }
     } catch(e) {
         console.error('Ошибка:', e);
-        alert('Ошибка: ' + e.message + '\n\nПроверь URL в коде и что Apps Script развёрнут как веб-приложение с доступом "Все, у кого есть ссылка"');
+        alert('Ошибка: ' + e.message);
     }
 }
 
 // Загрузить данные из Google Sheets
 async function downloadFromSheets() {
     try {
-        const response = await fetch(API_URL + '?t=' + Date.now()); // добавляем кэш-бuster
+        const response = await fetch(API_URL + '?t=' + Date.now());
         const data = await response.json();
+        if (data.error) {
+            alert('Ошибка: ' + data.error);
+            return;
+        }
         if (data && data.length) {
             h = data;
             save();
@@ -115,7 +123,7 @@ async function downloadFromSheets() {
         }
     } catch(e) {
         console.error('Ошибка:', e);
-        alert('Ошибка загрузки: ' + e.message + '\n\nПроверь что таблица не пуста и URL правильный');
+        alert('Ошибка загрузки: ' + e.message);
     }
 }
 
