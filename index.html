@@ -83,13 +83,15 @@
         </div>
     </div>
     
-    <div class="footer-bar">
-        <div class="footer-buttons">
-            <button class="footer-btn" id="exportReportBtn">📊 HTML отчёт</button>
-            <button class="footer-btn" id="backupBtn" style="background:rgba(255,193,7,0.2); border-color:#ffc107;">💾 Резервная копия</button>
-            <button class="footer-btn" id="restoreBtn" style="background:rgba(52,168,83,0.2); border-color:#34a853;">🔄 Восстановить</button>
-        </div>
+<div class="footer-bar">
+    <div class="footer-buttons">
+        <button class="footer-btn" id="exportReportBtn">📊 HTML отчёт</button>
+        <button class="footer-btn" id="exportBtn">📄 CSV (данные)</button>
+        <button class="footer-btn" id="backupBtn" style="background:rgba(255,193,7,0.2); border-color:#ffc107;">💾 Резервная копия</button>
+        <button class="footer-btn" id="restoreBtn" style="background:rgba(52,168,83,0.2); border-color:#34a853;">🔄 Восст. из JSON</button>
+        <button class="footer-btn" id="restoreCsvBtn" style="background:rgba(255,87,34,0.2); border-color:#ff5722;">📁 Восст. из CSV</button>
     </div>
+</div>
 </div>
 
 <script>
@@ -378,6 +380,7 @@ document.getElementById('clearBtn').onclick = clearAll;
 document.getElementById('exportReportBtn').onclick = exportToHTML;
 document.getElementById('backupBtn').onclick = backupData;
 document.getElementById('restoreBtn').onclick = restoreData;
+document.getElementById('restoreCsvBtn').onclick = restoreFromCSV;
 
 })();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
@@ -403,6 +406,78 @@ if ('serviceWorker' in navigator) {
     setInterval(() => {
         navigator.serviceWorker.ready.then(reg => reg.update());
     }, 60 * 60 * 1000);
+}
+    // Восстановление из CSV файла
+function restoreFromCSV() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            const text = await file.text();
+            const lines = text.split('\n');
+            
+            // Пропускаем заголовок (первая строка)
+            const newRecords = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // Парсим CSV: №,"Тип",Дата,Время,"Заметка"
+                const match = line.match(/(\d+),"(Приход|Уход)",([^,]+),([^,]+),"(.*)"/);
+                if (match) {
+                    const type = match[2] === 'Приход' ? 'arrive' : 'leave';
+                    const date = match[3];
+                    const time = match[4];
+                    const note = match[5] || '';
+                    
+                    // Создаём fullISO из даты и времени
+                    const dateParts = date.split('.');
+                    const timeParts = time.split(':');
+                    let fullISO = '';
+                    let timestamp = Date.now();
+                    
+                    if (dateParts.length === 3 && timeParts.length >= 2) {
+                        const year = dateParts[2];
+                        const month = dateParts[1];
+                        const day = dateParts[0];
+                        const hours = timeParts[0];
+                        const minutes = timeParts[1];
+                        const seconds = timeParts[2] || '00';
+                        fullISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+                        timestamp = new Date(fullISO).getTime();
+                    }
+                    
+                    newRecords.push({
+                        id: Date.now() + Math.random() + i,
+                        type: type,
+                        date: date,
+                        time: time,
+                        note: note,
+                        fullISO: fullISO,
+                        timestamp: timestamp
+                    });
+                }
+            }
+            
+            if (newRecords.length) {
+                if (confirm(`Найдено ${newRecords.length} записей в CSV. Добавить их к текущим?`)) {
+                    h = [...newRecords, ...h];
+                    save();
+                    render();
+                    alert(`✅ Добавлено ${newRecords.length} записей из CSV`);
+                }
+            } else {
+                alert('Не удалось распознать CSV файл. Убедись, что он экспортирован из FlexTime.');
+            }
+        } catch(e) {
+            alert('Ошибка при чтении файла: ' + e.message);
+        }
+    };
+    input.click();
 }
 </script>
 </body>
