@@ -96,14 +96,22 @@ async function uploadToSheets() {
         const originalText = btn.innerHTML;
         btn.innerHTML = '⏳ Отправка...';
         
-        // Используем прокси для обхода CORS
-        const response = await fetch(CORS_PROXY + API_URL, {
+        // Подготавливаем данные для Google Sheets (простой массив)
+        const rows = h.map(record => [
+            record.id,
+            record.type === 'arrive' ? 'Приход' : 'Уход',
+            record.date,
+            record.time,
+            record.note || '',
+            record.fullISO
+        ]);
+        
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Origin': window.location.origin
             },
-            body: JSON.stringify(h)
+            body: JSON.stringify(rows)  // Отправляем массив, а не объекты
         });
         
         btn.innerHTML = originalText;
@@ -120,7 +128,7 @@ async function uploadToSheets() {
         }
     } catch(e) {
         console.error('Ошибка:', e);
-        alert('⚠️ Ошибка соединения. Проверь интернет.\n\n' + e.message);
+        alert('⚠️ Ошибка соединения: ' + e.message);
     }
 }
 
@@ -131,8 +139,7 @@ async function downloadFromSheets() {
         const originalText = btn.innerHTML;
         btn.innerHTML = '⏳ Загрузка...';
         
-        // Используем прокси для обхода CORS
-        const response = await fetch(CORS_PROXY + API_URL + '?t=' + Date.now());
+        const response = await fetch(API_URL + '?t=' + Date.now());
         
         btn.innerHTML = originalText;
         
@@ -142,22 +149,53 @@ async function downloadFromSheets() {
         
         const data = await response.json();
         
+        console.log('Полученные данные:', data); // Для отладки
+        
         if (data.error) {
             alert('Ошибка: ' + data.error);
             return;
         }
         
         if (data && data.length) {
-            h = data;
+            // Преобразуем данные из Google Sheets в формат приложения
+            const convertedData = data.map(row => {
+                // Если данные пришли как массив (из doGet)
+                if (Array.isArray(row)) {
+                    return {
+                        id: row[0] || Date.now() + Math.random(),
+                        type: row[1] === 'Приход' ? 'arrive' : (row[1] === 'Уход' ? 'leave' : row[1]),
+                        date: row[2] || '',
+                        time: row[3] || '',
+                        note: row[4] || '',
+                        fullISO: row[5] || new Date().toISOString(),
+                        timestamp: new Date(row[5] || new Date()).getTime()
+                    };
+                }
+                // Если данные пришли как объект
+                return {
+                    id: row.id || Date.now() + Math.random(),
+                    type: row.type === 'Приход' ? 'arrive' : (row.type === 'Уход' ? 'leave' : row.type),
+                    date: row.date || '',
+                    time: row.time || '',
+                    note: row.note || '',
+                    fullISO: row.fullISO || new Date().toISOString(),
+                    timestamp: row.timestamp || new Date(row.fullISO || new Date()).getTime()
+                };
+            });
+            
+            // Сортируем по времени (новые сверху)
+            convertedData.sort((a, b) => new Date(b.fullISO) - new Date(a.fullISO));
+            
+            h = convertedData;
             save();
             render();
-            alert('✅ Данные загружены из Google Sheets');
+            alert(`✅ Загружено ${convertedData.length} записей из Google Sheets`);
         } else {
             alert('Нет данных в таблице');
         }
     } catch(e) {
         console.error('Ошибка:', e);
-        alert('⚠️ Ошибка загрузки. Проверь интернет.\n\n' + e.message);
+        alert('⚠️ Ошибка загрузки: ' + e.message);
     }
 }
 
