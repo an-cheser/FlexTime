@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flextime-v3';
+const CACHE_NAME = 'flextime-v2';
 
 self.addEventListener('install', event => {
     event.waitUntil(
