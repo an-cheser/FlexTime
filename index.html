@@ -96,14 +96,14 @@ async function uploadToSheets() {
         const originalText = btn.innerHTML;
         btn.innerHTML = '⏳ Отправка...';
         
-        // Подготавливаем данные для Google Sheets (простой массив)
+        // Подготавливаем данные для Google Sheets (простой массив, без ISO дат)
         const rows = h.map(record => [
             record.id,
             record.type === 'arrive' ? 'Приход' : 'Уход',
-            record.date,
-            record.time,
+            record.date,      // уже в формате ДД.ММ.ГГГГ
+            record.time,      // уже в формате ЧЧ:ММ:СС
             record.note || '',
-            record.fullISO
+            ''                // пустая колонка для ISO (не используем)
         ]);
         
         const response = await fetch(API_URL, {
@@ -111,20 +111,15 @@ async function uploadToSheets() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(rows)  // Отправляем массив, а не объекты
+            body: JSON.stringify(rows)
         });
         
         btn.innerHTML = originalText;
         
         if (response.ok) {
-            const result = await response.json();
-            if (result.status === 'ok') {
-                alert('✅ Данные сохранены в Google Sheets');
-            } else {
-                alert('❌ Ошибка: ' + (result.error || 'неизвестная'));
-            }
+            alert('✅ Данные сохранены в Google Sheets');
         } else {
-            alert('❌ Ошибка сервера: ' + response.status);
+            alert('❌ Ошибка при сохранении');
         }
     } catch(e) {
         console.error('Ошибка:', e);
@@ -149,7 +144,7 @@ async function downloadFromSheets() {
         
         const data = await response.json();
         
-        console.log('Полученные данные:', data); // Для отладки
+        console.log('Сырые данные из таблицы:', data);
         
         if (data.error) {
             alert('Ошибка: ' + data.error);
@@ -157,39 +152,100 @@ async function downloadFromSheets() {
         }
         
         if (data && data.length) {
-            // Преобразуем данные из Google Sheets в формат приложения
-            const convertedData = data.map(row => {
-                // Если данные пришли как массив (из doGet)
+            const convertedData = [];
+            
+            for (const row of data) {
+                // Определяем, пришёл ли массив или объект
+                let id, type, dateStr, timeStr, note, isoStr;
+                
                 if (Array.isArray(row)) {
-                    return {
-                        id: row[0] || Date.now() + Math.random(),
-                        type: row[1] === 'Приход' ? 'arrive' : (row[1] === 'Уход' ? 'leave' : row[1]),
-                        date: row[2] || '',
-                        time: row[3] || '',
-                        note: row[4] || '',
-                        fullISO: row[5] || new Date().toISOString(),
-                        timestamp: new Date(row[5] || new Date()).getTime()
-                    };
+                    // Данные как массив [ID, Тип, Дата, Время, Заметка, ISO]
+                    id = row[0];
+                    type = row[1];
+                    dateStr = row[2];
+                    timeStr = row[3];
+                    note = row[4] || '';
+                    isoStr = row[5];
+                } else {
+                    // Данные как объект
+                    id = row.id;
+                    type = row.type;
+                    dateStr = row.date;
+                    timeStr = row.time;
+                    note = row.note || '';
+                    isoStr = row.fullISO;
                 }
-                // Если данные пришли как объект
-                return {
-                    id: row.id || Date.now() + Math.random(),
-                    type: row.type === 'Приход' ? 'arrive' : (row.type === 'Уход' ? 'leave' : row.type),
-                    date: row.date || '',
-                    time: row.time || '',
-                    note: row.note || '',
-                    fullISO: row.fullISO || new Date().toISOString(),
-                    timestamp: row.timestamp || new Date(row.fullISO || new Date()).getTime()
-                };
-            });
+                
+                // Пропускаем пустые строки
+                if (!id && !dateStr) continue;
+                
+                // Конвертируем тип
+                let typeValue = 'arrive';
+                if (type === 'Уход' || type === 'leave' || type === 'leaveBtn') {
+                    typeValue = 'leave';
+                }
+                
+                // Нормализуем дату — избавляемся от странных значений
+                let finalDate = '';
+                let finalTime = '';
+                let finalISO = '';
+                
+                // Если дата пришла в формате 1899-12-30... — игнорируем, используем из таблицы
+                if (dateStr && !dateStr.startsWith('1899')) {
+                    finalDate = dateStr;
+                }
+                
+                if (timeStr && !timeStr.includes('1899')) {
+                    finalTime = timeStr;
+                }
+                
+                // Создаём нормальную ISO дату из даты и времени
+                if (finalDate && finalTime) {
+                    // Парсим дату из формата ДД.ММ.ГГГГ
+                    const dateParts = finalDate.split('.');
+                    if (dateParts.length === 3) {
+                        const day = dateParts[0];
+                        const month = dateParts[1];
+                        const year = dateParts[2];
+                        const timeParts = finalTime.split(':');
+                        if (timeParts.length >= 2) {
+                            const hours = timeParts[0];
+                            const minutes = timeParts[1];
+                            const seconds = timeParts[2] || '00';
+                            finalISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+                        }
+                    }
+                }
+                
+                convertedData.push({
+                    id: id || Date.now() + Math.random(),
+                    type: typeValue,
+                    date: finalDate,
+                    time: finalTime,
+                    note: note || '',
+                    fullISO: finalISO,
+                    timestamp: Date.now()
+                });
+            }
             
-            // Сортируем по времени (новые сверху)
-            convertedData.sort((a, b) => new Date(b.fullISO) - new Date(a.fullISO));
+            // Фильтруем пустые записи
+            const validData = convertedData.filter(record => record.date && record.time);
             
-            h = convertedData;
-            save();
-            render();
-            alert(`✅ Загружено ${convertedData.length} записей из Google Sheets`);
+            if (validData.length) {
+                // Сортируем по дате (новые сверху)
+                validData.sort((a, b) => {
+                    if (a.date > b.date) return -1;
+                    if (a.date < b.date) return 1;
+                    return 0;
+                });
+                
+                h = validData;
+                save();
+                render();
+                alert(`✅ Загружено ${validData.length} записей из Google Sheets`);
+            } else {
+                alert('Нет корректных данных в таблице');
+            }
         } else {
             alert('Нет данных в таблице');
         }
