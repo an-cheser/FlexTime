@@ -93,7 +93,6 @@ function exportCSV(){
     URL.revokeObjectURL(url);
 }
 
-// ИСПРАВЛЕННАЯ функция HTML (открывает в новой вкладке)
 function exportToHTML() {
     if (h.length === 0) {alert('Нет записей для экспорта');return;}
     const daysMap = new Map();
@@ -104,11 +103,86 @@ function exportToHTML() {
     const totalHours = dailyHours.reduce((sum, d) => sum + d.hoursNum, 0);
     const avgHours = (totalHours / dailyHours.length).toFixed(1);
     const totalOvertime = dailyHours.reduce((sum, d) => sum + (d.diff > 0 ? d.diff : 0), 0);
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>FlexTime — Отчёт</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a2a1a;padding:20px;font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif}.container{max-width:800px;margin:0 auto;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:32px;padding:24px;border:1px solid rgba(255,255,255,0.1)}h1{color:white;margin-bottom:8px}.sub{color:rgba(255,255,255,0.6);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1)}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}.stat-card{background:rgba(255,255,255,0.05);border-radius:20px;padding:16px;text-align:center}.stat-value{font-size:28px;font-weight:700;color:white}.stat-label{font-size:13px;color:rgba(255,255,255,0.5);margin-top:8px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08)}th{color:rgba(255,255,255,0.7);font-weight:600}.overtime{color:#4ade80;font-weight:600}.undertime{color:#f87171;font-weight:600}.normal{color:rgba(255,255,255,0.7)}.footer{color:rgba(255,255,255,0.4);font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);text-align:center}</style></head><body><div class="container"><h1>⏱️ FlexTime — Отчёт о рабочем времени</h1><div class="sub">Период: ${sortedDays[0] || '—'} — ${sortedDays[sortedDays.length-1] || '—'}</div><div class="stats"><div class="stat-card"><div class="stat-value">${dailyHours.length}</div><div class="stat-label">Рабочих дней</div></div><div class="stat-card"><div class="stat-value">${Math.floor(totalHours)}ч ${Math.floor(totalHours%1*60)}м</div><div class="stat-label">Всего отработано</div></div><div class="stat-card"><div class="stat-value">${avgHours} ч/день</div><div class="stat-label">Средний день</div></div><div class="stat-card"><div class="stat-value">+${Math.floor(totalOvertime)}ч ${Math.floor(totalOvertime%1*60)}м</div><div class="stat-label">Переработка</div></div></div><table><thead><tr><th>Дата</th><th>Отработано</th><th>Отклонение от 8ч</th></tr></thead><tbody>${dailyHours.map(d => `<tr><td>${d.date}</td><td>${d.hours}ч ${d.minutes}м${d.hours === 0 && d.minutes === 0 ? ' <span style="color:#f87171">(не отмечен уход?)</span>' : ''}${d.hours === 0 && d.minutes === 0 ? '' : ''}</td><td class="${d.diffClass}">${d.diffText}${d.hours === 0 && d.minutes === 0 ? ' (нет полной пары)' : ''}</td>`).join('')}</tbody></table><div class="footer">📅 Отчёт сгенерирован ${new Date().toLocaleString('ru-RU')}<br>✅ Зелёный = переработка | ❌ Красный = недоработка</div></div></body></html>`;
-    // Открываем в новой вкладке
-    const newWindow = window.open();
-    newWindow.document.write(html);
-    newWindow.document.close();
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>FlexTime — Отчёт</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a2a1a;padding:20px;font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif}.container{max-width:800px;margin:0 auto;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:32px;padding:24px;border:1px solid rgba(255,255,255,0.1)}h1{color:white;margin-bottom:8px}.sub{color:rgba(255,255,255,0.6);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1)}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}.stat-card{background:rgba(255,255,255,0.05);border-radius:20px;padding:16px;text-align:center}.stat-value{font-size:28px;font-weight:700;color:white}.stat-label{font-size:13px;color:rgba(255,255,255,0.5);margin-top:8px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08)}th{color:rgba(255,255,255,0.7);font-weight:600}.overtime{color:#4ade80;font-weight:600}.undertime{color:#f87171;font-weight:600}.normal{color:rgba(255,255,255,0.7)}.footer{color:rgba(255,255,255,0.4);font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);text-align:center}</style></head><body><div class="container"><h1>⏱️ FlexTime — Отчёт о рабочем времени</h1><div class="sub">Период: ${sortedDays[0] || '—'} — ${sortedDays[sortedDays.length-1] || '—'}</div><div class="stats"><div class="stat-card"><div class="stat-value">${dailyHours.length}</div><div class="stat-label">Рабочих дней</div></div><div class="stat-card"><div class="stat-value">${Math.floor(totalHours)}ч ${Math.floor(totalHours%1*60)}м</div><div class="stat-label">Всего отработано</div></div><div class="stat-card"><div class="stat-value">${avgHours} ч/день</div><div class="stat-label">Средний день</div></div><div class="stat-card"><div class="stat-value">+${Math.floor(totalOvertime)}ч ${Math.floor(totalOvertime%1*60)}м</div><div class="stat-label">Переработка</div></div></div><tr><thead><tr><th>Дата</th><th>Отработано</th><th>Отклонение от 8ч</th></tr></thead><tbody>${dailyHours.map(d => `<tr><td>${d.date}${d.hours === 0 && d.minutes === 0 ? ' <span style="color:#f87171">⚠️</span>' : ''}</td><td>${d.hours}ч ${d.minutes}м${d.hours === 0 && d.minutes === 0 ? ' <span style="color:#f87171">(нет ухода?)</span>' : ''}${d.hours === 0 && d.minutes === 0 ? '' : ''}</td><td class="${d.diffClass}">${d.diffText}${d.hours === 0 && d.minutes === 0 ? ' (нет полной пары)' : ''}</td>`).join('')}</tbody></table><div class="footer">📅 Отчёт сгенерирован ${new Date().toLocaleString('ru-RU')}<br>✅ Зелёный = переработка | ❌ Красный = недоработка</div></div></body></html>`;
+    
+    // Модальное окно вместо новой вкладки (работает в PWA)
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0a2a1a;
+        z-index: 20000;
+        display: flex;
+        flex-direction: column;
+        animation: fadeInModal 0.3s ease;
+    `;
+    
+    const header = document.createElement('div');
+    header.style.cssText = `
+        padding: 20px 16px;
+        padding-top: max(20px, env(safe-area-inset-top));
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    `;
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '← Вернуться';
+    closeBtn.style.cssText = `
+        background: rgba(255,255,255,0.15);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 30px;
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: transform 0.1s ease;
+    `;
+    closeBtn.onclick = () => modal.remove();
+    
+    const title = document.createElement('span');
+    title.innerHTML = '📊 Отчёт FlexTime';
+    title.style.cssText = `
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+    `;
+    
+    header.appendChild(closeBtn);
+    header.appendChild(title);
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+        flex: 1;
+        overflow: auto;
+        padding: 16px;
+    `;
+    content.innerHTML = html;
+    
+    modal.appendChild(header);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // Добавляем анимацию, если ещё нет
+    if (!document.getElementById('modal-fade-style')) {
+        const style = document.createElement('style');
+        style.id = 'modal-fade-style';
+        style.textContent = `
+            @keyframes fadeInModal {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 }
 
 function render(){const cont=document.getElementById('logContainer'),cSpan=document.getElementById('counter'),tSpan=document.getElementById('todayStats');const total=h.length;cSpan.innerText=`${total} ${total===1?'запись':(total>=2&&total<=4?'записи':'записей')}`;tSpan.innerText=todayHours();if(!total){cont.innerHTML='<div class="empty-state"><span>📭</span>История пуста</div>';return;}let html='';h.forEach((r,i)=>{const num=h.length-i,cls=r.type,txt=r.type==='arrive'?'🏢 ПРИХОД':'🏠 УХОД';html+=`<div class="log-item ${cls}" data-id="${r.id}"><div class="log-header"><span class="log-type ${cls}">${txt} #${num}</span><span class="log-time">⏰ ${r.time}</span></div><div class="log-date">📅 ${r.date}</div>${r.note?`<div class="log-note">📝 ${escapeHtml(r.note)}</div>`:''}</div>`;});cont.innerHTML=html;document.querySelectorAll('.log-item').forEach(item=>{let timer;item.addEventListener('touchstart',()=>{timer=setTimeout(()=>{if(confirm('Удалить запись?'))delById(item.dataset.id);},500);});item.addEventListener('touchend',()=>clearTimeout(timer));item.addEventListener('touchmove',()=>clearTimeout(timer));});}
