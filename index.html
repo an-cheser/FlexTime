@@ -29,6 +29,7 @@
         .note-input:focus{outline:none;background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3)}
         .note-input::placeholder{color:rgba(255,255,255,0.5)}
         .stats-bar{display:flex;justify-content:space-between;align-items:center;padding:0.875rem 1.25rem;background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:0.0625rem solid rgba(255,255,255,0.08);border-bottom:0.0625rem solid rgba(255,255,255,0.08)}
+        .count-badge{background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;padding:0.375rem 1rem;border-radius:2.5rem;font-weight:600;font-size:0.875rem;border:0.0625rem solid rgba(255,255,255,0.1)}
         .today-stats{font-size:0.8125rem;color:rgba(255,255,255,0.7);font-weight:500}
         .clear-btn{background:rgba(255,255,255,0.08);border:0.0625rem solid rgba(255,255,255,0.15);padding:0.375rem 1rem;border-radius:2.5rem;font-size:0.8125rem;font-weight:500;color:#ff8a8a;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(8px)}
         .clear-btn:active{background:rgba(255,68,68,0.2);transform:scale(0.96);border-color:rgba(255,100,100,0.4)}
@@ -70,6 +71,7 @@
     </div>
     
     <div class="stats-bar">
+        <div><span class="count-badge" id="counter">0 записей</span></div>
         <div class="today-stats" id="todayStats">Сегодня: —</div>
         <button class="clear-btn" id="clearBtn">🗑 Очистить</button>
     </div>
