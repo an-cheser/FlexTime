@@ -117,5 +117,8 @@ load();render();document.getElementById('arriveBtn').onclick=()=>add('arrive');d
 })();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>
+    <script>
+        if ('serviceWorker' in navigator) {navigator.serviceWorker.register('/sw.js').then(reg => {reg.addEventListener('updatefound', () => {const newWorker = reg.installing;newWorker.addEventListener('statechange', () => {if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {const updateNotification = document.createElement('div');updateNotification.innerHTML = `<div style="position:fixed;bottom:20px;left:20px;right:20px;background:rgba(0,0,0,0.9);backdrop-filter:blur(20px);border-radius:20px;padding:16px;text-align:center;z-index:1000;border:1px solid rgba(255,255,255,0.2);color:white;">⚡ Доступна новая версия!<br><button id="reloadBtn" style="margin-top:10px;background:#11998e;border:none;padding:8px 20px;border-radius:30px;color:white;font-weight:bold;">Обновить сейчас</button></div>`;document.body.appendChild(updateNotification);document.getElementById('reloadBtn').onclick = () => {newWorker.postMessage({action: 'skipWaiting'});window.location.reload();};}});});});setInterval(() => {navigator.serviceWorker.ready.then(reg => {reg.update();});}, 60 * 60 * 1000);}
+    </script>
 </body>
 </html>
