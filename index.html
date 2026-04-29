@@ -76,7 +76,7 @@
 const STORAGE_KEY='flextime_logger';
 let h=[];
 // URL твоего веб-приложения из Apps Script
-const API_URL = '1_H7l_P4Uvc6ZpRzdTyF4grV8COvxHuHWLV7sZXwWpQZL69r-n7VO-asp';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxRvLjp4DKDGJRV0X8XovlAYOd5OsYUaW8NbGdvxlA3SBA8HNyC0DyJsz_bHayQxMihkw/exec';
 
 // Выгрузить данные в Google Sheets
 async function uploadToSheets() {
@@ -87,21 +87,38 @@ async function uploadToSheets() {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
+            mode: 'no-cors',  // ← добавляем для обхода CORS
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify(h)
         });
-        
-        if (response.ok) {
-            alert('✅ Данные сохранены в Google Sheets');
-        } else {
-            alert('❌ Ошибка при сохранении');
-        }
+        alert('✅ Данные отправлены в Google Sheets (проверь таблицу через 5-10 секунд)');
     } catch(e) {
-        alert('Ошибка: ' + e.message);
+        console.error('Ошибка:', e);
+        alert('Ошибка: ' + e.message + '\n\nПроверь URL в коде и что Apps Script развёрнут как веб-приложение с доступом "Все, у кого есть ссылка"');
     }
 }
 
 // Загрузить данные из Google Sheets
-async function downloadFromSheets() {try {const response = await fetch(API_URL);const data = await response.json();if (data && data.length) {h = data;save();render();alert('✅ Данные загружены из Google Sheets');} else {alert('Нет данных в таблице');}} catch(e) {alert('Ошибка: ' + e.message);}}
+async function downloadFromSheets() {
+    try {
+        const response = await fetch(API_URL + '?t=' + Date.now()); // добавляем кэш-бuster
+        const data = await response.json();
+        if (data && data.length) {
+            h = data;
+            save();
+            render();
+            alert('✅ Данные загружены из Google Sheets');
+        } else {
+            alert('Нет данных в таблице');
+        }
+    } catch(e) {
+        console.error('Ошибка:', e);
+        alert('Ошибка загрузки: ' + e.message + '\n\nПроверь что таблица не пуста и URL правильный');
+    }
+}
+
 function load(){const s=localStorage.getItem(STORAGE_KEY);if(s)try{const p=JSON.parse(s);if(Array.isArray(p))h=p;}catch(e){}}
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(h));}
 function now(){const d=new Date(),date=`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`,time=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;return{date,time,fullISO:d.toISOString(),ts:d.getTime()};}
