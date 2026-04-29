@@ -70,6 +70,10 @@
     <button class="export-btn" id="uploadBtn" style="flex:1; background:rgba(66,133,244,0.2); border-color:#4285f4;">☁️ Выгрузить в Google</button>
     <button class="export-btn" id="downloadBtn" style="flex:1; background:rgba(52,168,83,0.2); border-color:#34a853;">☁️ Загрузить из Google</button>
 </div>
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+<button class="export-btn" id="importBtn" style="flex:1; background:rgba(255,193,7,0.2); border-color:#ffc107;">📁 Импорт из CSV</button>
+</div>
 </div>
 <script>
 (function(){
@@ -214,10 +218,54 @@ function exportToHTML() {if (h.length === 0) {alert('Нет записей дл�
         document.head.appendChild(style);
     }
 }
-
+// Импорт из CSV файла
+function importFromCSV() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const text = await file.text();
+        const lines = text.split('\n');
+        const headers = lines[0].split(',');
+        
+        const newRecords = [];
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            // Парсим CSV (упрощённо)
+            const match = line.match(/(\d+),"([^"]+)",([^,]+),([^,]+),"([^"]*)"/);
+            if (match) {
+                newRecords.push({
+                    id: Date.now() + Math.random() * i,
+                    type: match[2] === 'Приход' ? 'arrive' : 'leave',
+                    date: match[3],
+                    time: match[4],
+                    fullISO: new Date().toISOString(),
+                    timestamp: Date.now(),
+                    note: match[5] || ''
+                });
+            }
+        }
+        
+        if (newRecords.length) {
+            h = [...newRecords, ...h];
+            save();
+            render();
+            alert(`✅ Импортировано ${newRecords.length} записей`);
+        } else {
+            alert('Не удалось распознать файл');
+        }
+    };
+    input.click();
+}
+    
 function render(){const cont=document.getElementById('logContainer'),cSpan=document.getElementById('counter'),tSpan=document.getElementById('todayStats');const total=h.length;cSpan.innerText=`${total} ${total===1?'запись':(total>=2&&total<=4?'записи':'записей')}`;tSpan.innerText=todayHours();if(!total){cont.innerHTML='<div class="empty-state"><span>📭</span>История пуста</div>';return;}let html='';h.forEach((r,i)=>{const num=h.length-i,cls=r.type,txt=r.type==='arrive'?'🏢 ПРИХОД':'🏠 УХОД';html+=`<div class="log-item ${cls}" data-id="${r.id}"><div class="log-header"><span class="log-type ${cls}">${txt} #${num}</span><span class="log-time">⏰ ${r.time}</span></div><div class="log-date">📅 ${r.date}</div>${r.note?`<div class="log-note">📝 ${escapeHtml(r.note)}</div>`:''}</div>`;});cont.innerHTML=html;document.querySelectorAll('.log-item').forEach(item=>{let timer;item.addEventListener('touchstart',()=>{timer=setTimeout(()=>{if(confirm('🗑 Удалить запись?'))delById(item.dataset.id);},500);});item.addEventListener('touchend',()=>clearTimeout(timer));item.addEventListener('touchmove',()=>clearTimeout(timer));item.addEventListener('contextmenu',(e)=>{e.preventDefault();if(confirm('🗑 Удалить запись?'))delById(item.dataset.id);});});}
 function escapeHtml(t){const div=document.createElement('div');div.textContent=t;return div.innerHTML;}
-load();render();document.getElementById('arriveBtn').onclick=()=>add('arrive');document.getElementById('leaveBtn').onclick=()=>add('leave');document.getElementById('clearBtn').onclick=clearAll;document.getElementById('exportBtn').onclick=exportCSV;document.getElementById('exportReportBtn').onclick=exportToHTML;document.getElementById('uploadBtn').onclick = uploadToSheets;document.getElementById('downloadBtn').onclick = downloadFromSheets;
+load();render();document.getElementById('arriveBtn').onclick=()=>add('arrive');document.getElementById('leaveBtn').onclick=()=>add('leave');document.getElementById('clearBtn').onclick=clearAll;document.getElementById('exportBtn').onclick=exportCSV;document.getElementById('exportReportBtn').onclick=exportToHTML;document.getElementById('uploadBtn').onclick = uploadToSheets;document.getElementById('downloadBtn').onclick = downloadFromSheets;document.getElementById('importBtn').onclick = importFromCSV;
 })();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>
