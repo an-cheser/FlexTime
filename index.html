@@ -2,70 +2,457 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="FlexTime">
     <meta name="theme-color" content="#1a472a">
-    <title>FlexTime — учёт рабочего времени</title>
+    <title>FlexTime — учёт гибкого рабочего времени</title>
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="favicon.png">
+    
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-        html{font-size:16px}
-        body{background:radial-gradient(circle at 20% 30%, #0a2a1a, #051a0f);min-height:100vh;padding:max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));font-family:-apple-system,BlinkMacSystemFont,Roboto,Helvetica,sans-serif;touch-action:manipulation}
-        .app-container {max-width: 37.5rem;margin: 0 auto;background: rgba(255,255,255,0.08);backdrop-filter: blur(20px);border-radius: 3rem;overflow: hidden;box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.3), inset 0 0.0625rem 0 rgba(255,255,255,0.1);border: 0.0625rem solid rgba(255,255,255,0.1);display: flex;flex-direction: column;height: auto;min-height: 100vh;}
-        .header{background:rgba(20,40,30,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;padding:max(1.25rem, env(safe-area-inset-top)) 1.25rem 1.75rem 1.25rem;text-align:center;border-bottom:0.0625rem solid rgba(255,255,255,0.1)}
-        .header h1{font-size:2rem;font-weight:700;margin-bottom:0.5rem;text-shadow:0 0.125rem 0.625rem rgba(0,0,0,0.2)}
-        .header p{font-size:0.875rem;opacity:.7;letter-spacing:0.03125rem}
-        .action-buttons{padding:1.5rem 1.25rem 1rem;display:flex;gap:0.875rem}
-        .action-btn{flex:1;padding:1.125rem 0.75rem;border:none;border-radius:5rem;font-size:1.125rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.625rem;cursor:pointer;transition:transform 0.1s ease;touch-action:manipulation;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative;overflow:hidden}
-        .action-btn:active{transform:scale(0.97);filter:brightness(0.95)}
-        .action-btn::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0));border-radius:5rem}
-        .btn-arrive{background:linear-gradient(135deg,rgba(17,153,142,0.8),rgba(56,239,125,0.7));color:#fff;box-shadow:0 0.5rem 1.25rem rgba(17,153,142,0.3);border:0.0625rem solid rgba(255,255,255,0.2)}
-        .btn-leave{background:linear-gradient(135deg,rgba(238,9,121,0.8),rgba(255,106,0,0.7));color:#fff;box-shadow:0 0.5rem 1.25rem rgba(238,9,121,0.3);border:0.0625rem solid rgba(255,255,255,0.2)}
-        .note-section{padding:0.5rem 1.25rem 1.25rem}
-        .note-input{width:100%;padding:0.875rem 1.125rem;border:none;border-radius:2rem;font-size:0.9375rem;font-family:inherit;background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;resize:none;transition:all 0.2s;border:0.0625rem solid rgba(255,255,255,0.1)}
-        .note-input:focus{outline:none;background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3)}
-        .note-input::placeholder{color:rgba(255,255,255,0.5)}
-        .stats-bar{display:flex;justify-content:space-between;align-items:center;padding:0.875rem 1.25rem;background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:0.0625rem solid rgba(255,255,255,0.08);border-bottom:0.0625rem solid rgba(255,255,255,0.08)}
-        .count-badge{background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;padding:0.375rem 1rem;border-radius:2.5rem;font-weight:600;font-size:0.875rem;border:0.0625rem solid rgba(255,255,255,0.1)}
-        .today-stats{font-size:0.8125rem;color:rgba(255,255,255,0.7);font-weight:500}
-        .clear-btn{background:rgba(255,255,255,0.08);border:0.0625rem solid rgba(255,255,255,0.15);padding:0.375rem 1rem;border-radius:2.5rem;font-size:0.8125rem;font-weight:500;color:#ff8a8a;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(8px)}
-        .clear-btn:active{background:rgba(255,68,68,0.2);transform:scale(0.96);border-color:rgba(255,100,100,0.4)}
-        .history-section {flex: 1;overflow-y: auto;padding: 1.25rem;background: transparent;}
-        .history-title{display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;font-size:1.125rem;font-weight:600;color:rgba(255,255,255,0.9);text-shadow:0 0.0625rem 0.25rem rgba(0,0,0,0.2)}
-        .log-container{display:flex;flex-direction:column;gap:0.625rem}
-        .log-container::-webkit-scrollbar{width:4px}
-        .log-container::-webkit-scrollbar-track{background:rgba(255,255,255,0.05);border-radius:0.625rem}
-        .log-container::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.3);border-radius:0.625rem}
-        .log-item{background:rgba(255,255,255,0.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:0.875rem;border-radius:1.25rem;box-shadow:0 0.25rem 1rem rgba(0,0,0,0.1);border:0.0625rem solid rgba(255,255,255,0.12);transition:all 0.2s;animation:slideIn 0.25s ease}
-        .log-item:active{transform:scale(0.98);background:rgba(255,255,255,0.12)}
-        .log-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem}
-        .log-type{font-weight:700;font-size:0.8125rem;padding:0.25rem 0.875rem;border-radius:1.875rem;background:rgba(255,255,255,0.1);backdrop-filter:blur(4px);letter-spacing:0.01875rem}
-        .log-type.arrive{color:#6ef0b0;border-left:0.125rem solid #38ef7d}
-        .log-type.leave{color:#ff9e7a;border-left:0.125rem solid #ff6a00}
-        .log-time{font-size:1.125rem;font-weight:700;font-family:monospace;color:rgba(255,255,255,0.95);letter-spacing:0.03125rem}
-        .log-date{font-size:0.75rem;color:rgba(255,255,255,0.55);margin-top:0.125rem}
-        .log-note{margin-top:0.625rem;padding-top:0.5rem;border-top:0.0625rem solid rgba(255,255,255,0.1);font-size:0.8125rem;color:rgba(255,255,255,0.6);font-style:italic}
-        .empty-state{text-align:center;padding:3.125rem 1.25rem;color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.04);border-radius:1.75rem;backdrop-filter:blur(8px);font-size:0.875rem}
-        .empty-state span{font-size:3rem;display:block;margin-bottom:0.75rem;opacity:0.7}
-        .footer-bar{position:relative;background:rgba(5,26,15,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:0.0625rem solid rgba(255,255,255,0.1);padding:0.75rem 1rem;margin-top:auto}
-        .footer-buttons{display:flex;gap:0.625rem;flex-wrap:wrap}
-        .footer-btn{flex:1;background:rgba(255,255,255,0.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:0.0625rem solid rgba(255,255,255,0.2);padding:0.75rem;border-radius:5rem;font-size:0.9375rem;font-weight:600;color:rgba(255,255,255,0.9);cursor:pointer;transition:all 0.2s;text-align:center}
-        .footer-btn:active{background:rgba(255,255,255,0.18);transform:scale(0.97);border-color:rgba(255,255,255,0.35)}
-        @keyframes slideIn{from{opacity:0;transform:translateY(0.75rem)}to{opacity:1;transform:translateY(0)}}
-        .action-menu {position: fixed;bottom: 20px;left: 20px;right: 20px;background: rgba(20,30,25,0.95);backdrop-filter: blur(20px);border-radius: 30px;padding: 12px;z-index: 20001;display: flex;gap: 12px;justify-content: center;border: 1px solid rgba(255,255,255,0.2);animation: fadeInUp 0.2s ease;}
-        .action-menu button {flex: 1;background: rgba(255,255,255,0.1);border: none;padding: 12px;border-radius: 40px;font-weight: 600;font-size: 16px;cursor: pointer;transition: 0.1s;}
-        .action-menu button:active { transform: scale(0.96); background: rgba(255,255,255,0.2); }
-        .action-menu .edit-btn { color: #4ade80; }
-        .action-menu .delete-btn { color: #f87171; }
-        @keyframes fadeInUp {from { opacity: 0; transform: translateY(30px);}to { opacity: 1; transform: translateY(0); }}
+        /* ----- Общие сбросы и база ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;                 /* запрет выделения текста */
+            -webkit-touch-callout: none;       /* запрет меню копировать/выделить на iPhone */
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 30%, #0a2a1a, #051a0f);
+            min-height: 100vh;
+            padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+                     max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+            padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+            font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, sans-serif;
+            touch-action: manipulation;
+        }
+
+        /* ----- Контейнер приложения ----- */
+        .app-container {
+            max-width: 37.5rem;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border-radius: 3rem;
+            overflow: hidden;
+            box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.3), inset 0 0.0625rem 0 rgba(255,255,255,0.1);
+            border: 0.0625rem solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            min-height: 80vh;
+        }
+
+        /* ----- Шапка ----- */
+        .header {
+            background: rgba(20,40,30,0.5);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem 1.75rem 1.25rem;
+            text-align: center;
+            border-bottom: 0.0625rem solid rgba(255,255,255,0.1);
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0.125rem 0.625rem rgba(0,0,0,0.2);
+        }
+        .header p {
+            font-size: 0.875rem;
+            opacity: 0.7;
+            letter-spacing: 0.03125rem;
+        }
+
+        /* ----- Кнопки прихода/ухода ----- */
+        .action-buttons {
+            padding: 1.5rem 1.25rem 1rem;
+            display: flex;
+            gap: 0.875rem;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 1.125rem 0.75rem;
+            border: none;
+            border-radius: 5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.625rem;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            touch-action: manipulation;
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+        }
+        .action-btn:active {
+            transform: scale(0.97);
+            filter: brightness(0.95);
+        }
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+            border-radius: 5rem;
+        }
+        .btn-arrive {
+            background: linear-gradient(135deg, rgba(17,153,142,0.8), rgba(56,239,125,0.7));
+            color: #fff;
+            box-shadow: 0 0.5rem 1.25rem rgba(17,153,142,0.3);
+            border: 0.0625rem solid rgba(255,255,255,0.2);
+        }
+        .btn-leave {
+            background: linear-gradient(135deg, rgba(238,9,121,0.8), rgba(255,106,0,0.7));
+            color: #fff;
+            box-shadow: 0 0.5rem 1.25rem rgba(238,9,121,0.3);
+            border: 0.0625rem solid rgba(255,255,255,0.2);
+        }
+
+        /* ----- Поле заметок ----- */
+        .note-section {
+            padding: 0.5rem 1.25rem 1.25rem;
+        }
+        .note-input {
+            width: 100%;
+            padding: 0.875rem 1.125rem;
+            border: none;
+            border-radius: 2rem;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            resize: none;
+            transition: all 0.2s;
+            border: 0.0625rem solid rgba(255,255,255,0.1);
+        }
+        .note-input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .note-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ----- Статистика ----- */
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 1.25rem;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border-top: 0.0625rem solid rgba(255,255,255,0.08);
+            border-bottom: 0.0625rem solid rgba(255,255,255,0.08);
+        }
+        .count-badge {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            padding: 0.375rem 1rem;
+            border-radius: 2.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: 0.0625rem solid rgba(255,255,255,0.1);
+        }
+        .today-stats {
+            font-size: 0.8125rem;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+        .clear-btn {
+            background: rgba(255,255,255,0.08);
+            border: 0.0625rem solid rgba(255,255,255,0.15);
+            padding: 0.375rem 1rem;
+            border-radius: 2.5rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #ff8a8a;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(8px);
+        }
+        .clear-btn:active {
+            background: rgba(255,68,68,0.2);
+            transform: scale(0.96);
+            border-color: rgba(255,100,100,0.4);
+        }
+
+        /* ----- История событий ----- */
+        .history-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            background: transparent;
+        }
+        .history-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 0 0.0625rem 0.25rem rgba(0,0,0,0.2);
+        }
+        .log-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.625rem;
+        }
+        /* Стили скролла */
+        .log-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 0.625rem;
+        }
+        .log-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 0.625rem;
+        }
+        .log-item {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(16px);
+            padding: 0.875rem;
+            border-radius: 1.25rem;
+            box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.1);
+            border: 0.0625rem solid rgba(255,255,255,0.12);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .log-item:active {
+            transform: scale(0.99);
+            background: rgba(255,255,255,0.12);
+        }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .log-type {
+            font-weight: 700;
+            font-size: 0.8125rem;
+            padding: 0.25rem 0.875rem;
+            border-radius: 1.875rem;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.01875rem;
+        }
+        .log-type.arrive {
+            color: #6ef0b0;
+            border-left: 0.125rem solid #38ef7d;
+        }
+        .log-type.leave {
+            color: #ff9e7a;
+            border-left: 0.125rem solid #ff6a00;
+        }
+        .log-time {
+            font-size: 1.125rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: rgba(255,255,255,0.95);
+            letter-spacing: 0.03125rem;
+        }
+        .log-date {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.55);
+            margin-top: 0.125rem;
+        }
+        .log-note {
+            margin-top: 0.625rem;
+            padding-top: 0.5rem;
+            border-top: 0.0625rem solid rgba(255,255,255,0.1);
+            font-size: 0.8125rem;
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3.125rem 1.25rem;
+            color: rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.04);
+            border-radius: 1.75rem;
+            backdrop-filter: blur(8px);
+            font-size: 0.875rem;
+        }
+        .empty-state span {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 0.75rem;
+            opacity: 0.7;
+        }
+
+        /* ----- Фиксированная нижняя панель ----- */
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(5,26,15,0.95);
+            backdrop-filter: blur(20px);
+            border-top: 0.0625rem solid rgba(255,255,255,0.1);
+            padding: 0.75rem 1rem;
+            z-index: 1000;
+        }
+        .footer-buttons {
+            display: flex;
+            gap: 0.625rem;
+            flex-wrap: wrap;
+            max-width: 37.5rem;
+            margin: 0 auto;
+        }
+        .footer-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(16px);
+            border: 0.0625rem solid rgba(255,255,255,0.2);
+            padding: 0.75rem;
+            border-radius: 5rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .footer-btn:active {
+            background: rgba(255,255,255,0.18);
+            transform: scale(0.97);
+            border-color: rgba(255,255,255,0.35);
+        }
+
+        /* ----- Меню действий по длительному нажатию / правой кнопке ----- */
+        .action-menu {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(20,30,25,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 12px;
+            z-index: 20001;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.2s ease;
+        }
+        .action-menu button {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .action-menu button:active {
+            transform: scale(0.96);
+            background: rgba(255,255,255,0.2);
+        }
+        .action-menu .edit-btn {
+            color: #4ade80;
+        }
+        .action-menu .delete-btn {
+            color: #f87171;
+        }
+
+        /* ----- Анимации ----- */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(0.75rem);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ----- Экран загрузки ----- */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 30%, #0a2a1a, #051a0f);
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.4s ease;
+        }
+        .splash-icon {
+            width: 100px;
+            height: 100px;
+            background-image: url('icon.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 22px;
+            filter: blur(12px);
+            opacity: 0.6;
+            transform: scale(1.2);
+        }
+        .splash-text {
+            margin-top: 20px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
+
+<!-- ЭКРАН ЗАГРУЗКИ (сплэш) -->
+<div id="splash" class="splash-screen">
+    <div class="splash-icon"></div>
+    <div class="splash-text">Загрузка FlexTime...</div>
+</div>
+
+<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
 <div class="app-container">
-    <div class="header"><h1>⏱️ FlexTime</h1><p>Учёт гибкого рабочего времени | Приход → Уход</p></div>
+    <div class="header">
+        <h1>⏱️ FlexTime</h1>
+        <p>Учёт гибкого рабочего времени | Приход → Уход</p>
+    </div>
     
     <div class="action-buttons">
         <button class="action-btn btn-arrive" id="arriveBtn">🏢 ПРИХОД</button>
@@ -85,397 +472,628 @@
     <div class="history-section">
         <div class="history-title">📜 История событий</div>
         <div class="log-container" id="logContainer">
-            <div class="empty-state"><span>👆</span>Нажми «ПРИХОД» когда придёшь на работу<br>Нажми «УХОД» когда уходишь</div>
-        </div>
-    </div>
-    
-    <div class="footer-bar">
-        <div class="footer-buttons">
-            <button class="footer-btn" id="exportReportBtn">📊 HTML отчёт</button>
-            <button class="footer-btn" id="exportBtn">📄 CSV (данные)</button>
-            <button class="footer-btn" id="backupBtn" style="background:rgba(255,193,7,0.2); border-color:#ffc107;">💾 Резервная копия</button>
-            <button class="footer-btn" id="restoreBtn" style="background:rgba(52,168,83,0.2); border-color:#34a853;">🔄 Восст. из JSON</button>
-            <button class="footer-btn" id="restoreCsvBtn" style="background:rgba(255,87,34,0.2); border-color:#ff5722;">📁 Восст. из CSV</button>
+            <div class="empty-state">
+                <span>👆</span>
+                Нажми «ПРИХОД» когда придёшь на работу<br>
+                Нажми «УХОД» когда уходишь
+            </div>
         </div>
     </div>
 </div>
 
+<div class="footer-bar">
+    <div class="footer-buttons">
+        <button class="footer-btn" id="exportReportBtn">📊 HTML отчёт</button>
+        <button class="footer-btn" id="exportBtn">📄 CSV (данные)</button>
+        <button class="footer-btn" id="backupBtn" style="background:rgba(255,193,7,0.2); border-color:#ffc107;">💾 Резервная копия</button>
+        <button class="footer-btn" id="restoreBtn" style="background:rgba(52,168,83,0.2); border-color:#34a853;">🔄 Восст. из JSON</button>
+        <button class="footer-btn" id="restoreCsvBtn" style="background:rgba(255,87,34,0.2); border-color:#ff5722;">📁 Восст. из CSV</button>
+    </div>
+</div>
+
 <script>
-(function(){
-const STORAGE_KEY = 'flextime_logger';
-let h = [];
+    (function() {
+        // ========== 1. Константы и хранилище ==========
+        const STORAGE_KEY = 'flextime_logger';
+        let history = [];          // массив записей (будет всегда отсортирован по времени, новые сверху)
 
-function load() {
-    const s = localStorage.getItem(STORAGE_KEY);
-    if (s) {try {const p = JSON.parse(s);if (Array.isArray(p)) h = p;} catch(e) {}}}
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(h)); }
-
-function getCurrentDateTime() {
-    const d = new Date();
-    const date = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
-    const time = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
-    return { date, time, fullISO: d.toISOString(), timestamp: d.getTime() };
-}
-
-function add(type) {
-    const note = document.getElementById('noteInput').value.trim();
-    const { date, time, fullISO, timestamp } = getCurrentDateTime();
-    h.unshift({id: Date.now() + Math.random(),type: type,date: date,time: time,fullISO: fullISO,timestamp: timestamp,note: note});
-    save();
-    render();
-    document.getElementById('noteInput').value = '';
-    if (window.navigator?.vibrate) window.navigator.vibrate(50);}
-
-function calculateTodayWorkHours() {
-    const today = new Date().toLocaleDateString('ru-RU');
-    const todayEvents = h.filter(r => r.date === today);
-    let lastArrive = null;
-    let totalMinutes = 0;
-    for (let i = todayEvents.length - 1; i >= 0; i--) {
-        const event = todayEvents[i];
-        if (event.type === 'arrive') {lastArrive = event;} else if (event.type === 'leave' && lastArrive) {
-            const diff = (new Date(event.fullISO) - new Date(lastArrive.fullISO)) / 60000;
-            if (diff > 0 && diff < 720) totalMinutes += diff;
-            lastArrive = null;}}
-    if (totalMinutes > 0) {
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = Math.floor(totalMinutes % 60);
-        return `🕘 Сегодня: ${hours}ч ${minutes}м`;}
-    return `🕘 Сегодня: —`;}
-
-function clearAll() {
-    if (h.length && confirm('⚠️ Удалить ВСЮ историю? Отменить нельзя.')) {h = [];save();render();}}
-
-function deleteById(id) {
-    const idx = h.findIndex(r => String(r.id) === String(id));
-    if (idx !== -1) {
-        h.splice(idx, 1);
-        save();
-        render();
-        if (window.navigator?.vibrate) window.navigator.vibrate(50);}}
-
-function exportCSV() {
-    if (!h.length) { alert('Нет записей'); return; }
-    let csv = "\uFEFF№,Тип,Дата,Время,Заметка\n";
-    h.forEach((r,i) => {
-        const t = r.type === 'arrive' ? 'Приход' : 'Уход';
-        csv += `${h.length-i},"${t}",${r.date},${r.time},"${(r.note || '').replace(/"/g,'""')}"\n`;});
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.download = `flextime_${new Date().toISOString().slice(0,10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);}
-
-function exportToHTML() {
-    if (h.length === 0) { alert('Нет записей для экспорта'); return; }
-    const daysMap = new Map();
-    h.forEach(record => {
-        const isoDate = record.fullISO ? record.fullISO.slice(0,10) : null;
-        if (!isoDate) return;
-        if (!daysMap.has(isoDate)) daysMap.set(isoDate, []);
-        daysMap.get(isoDate).push(record);});
-    const sortedIsoDates = Array.from(daysMap.keys()).sort();
-    const dailyHours = [];
-    for (const isoDate of sortedIsoDates) {
-        const records = daysMap.get(isoDate);
-        const displayDate = records[0].date; 
-        let lastArrive = null;
-        let totalMinutes = 0;
-        const sortedRecords = [...records].sort((a,b) => a.timestamp - b.timestamp);
-        for (const event of sortedRecords) {if (event.type === 'arrive') {lastArrive = event;} else if (event.type === 'leave' && lastArrive) {const diff = (new Date(event.fullISO) - new Date(lastArrive.fullISO)) / 60000;if (diff > 0 && diff < 720) totalMinutes += diff;lastArrive = null;}}
-        const hoursNum = totalMinutes / 60;
-        const hours = Math.floor(hoursNum);
-        const minutes = Math.floor((hoursNum % 1) * 60);
-        const diff = hoursNum - 8;
-        const diffHours = Math.floor(Math.abs(diff));
-        const diffMins = Math.floor(Math.abs(diff) % 1 * 60);
-        dailyHours.push({date: displayDate,isoDate: isoDate,hours, minutes, hoursNum, diff,diffText: diff === 0 ? '0' : (diff > 0 ? `+${diffHours}ч ${diffMins}м` : `-${diffHours}ч ${diffMins}м`),diffClass: diff > 0 ? 'overtime' : (diff < 0 ? 'undertime' : 'normal')});}
-    
-    dailyHours.reverse();
-    const totalHours = dailyHours.reduce((s,d) => s + d.hoursNum, 0);
-    const avgHours = (totalHours / dailyHours.length).toFixed(1);
-    const totalOvertime = dailyHours.reduce((s,d) => s + (d.diff > 0 ? d.diff : 0), 0);
-    
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>FlexTime — Отчёт</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a2a1a;padding:20px;font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif}.container{max-width:800px;margin:0 auto;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:32px;padding:24px;border:1px solid rgba(255,255,255,0.1)}h1{color:white;margin-bottom:8px}.sub{color:rgba(255,255,255,0.6);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1)}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}.stat-card{background:rgba(255,255,255,0.05);border-radius:20px;padding:16px;text-align:center}.stat-value{font-size:28px;font-weight:700;color:white}.stat-label{font-size:13px;color:rgba(255,255,255,0.5);margin-top:8px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08)}th{color:rgba(255,255,255,0.7);font-weight:600}.overtime{color:#4ade80;font-weight:600}.undertime{color:#f87171;font-weight:600}.normal{color:rgba(255,255,255,0.7)}.footer{color:rgba(255,255,255,0.4);font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);text-align:center}</style></head><body><div class="container">
-    <h1>⏱️ FlexTime — Отчёт о рабочем времени</h1><div class="sub">Период: ${dailyHours[dailyHours.length-1]?.date || '—'} — ${dailyHours[0]?.date || '—'}</div><div class="stats"><div class="stat-card"><div class="stat-value">${dailyHours.length}</div><div class="stat-label">Рабочих дней</div></div><div class="stat-card"><div class="stat-value">${Math.floor(totalHours)}ч ${Math.floor(totalHours%1*60)}м</div><div class="stat-label">Всего отработано</div></div><div class="stat-card"><div class="stat-value">${avgHours} ч/день</div><div class="stat-label">Средний день</div></div><div class="stat-card"><div class="stat-value">+${Math.floor(totalOvertime)}ч ${Math.floor(totalOvertime%1*60)}м</div><div class="stat-label">Переработка</div></div></div><table><thead><tr><th>Дата</th><th>Отработано</th><th>Отклонение от 8ч</th></tr></thead><tbody>${dailyHours.map(d => `<tr><td>${d.date}${d.hours === 0 && d.minutes === 0 ? ' <span style="color:#f87171">⚠️</span>' : ''}</td><td>${d.hours}ч ${d.minutes}м${d.hours === 0 && d.minutes === 0 ? ' <span style="color:#f87171">(нет ухода?)</span>' : ''}</td><td class="${d.diffClass}">${d.diffText}${d.hours === 0 && d.minutes === 0 ? ' (нет полной пары)' : ''}</td>`).join('')}</tbody></table><div class="footer">📅 Отчёт сгенерирован ${new Date().toLocaleString('ru-RU')}<br>✅ Зелёный = переработка | ❌ Красный = недоработка</div></div></body></html>`;
-    
-    const modal = document.createElement('div');
-    modal.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;background:#0a2a1a;z-index:20000;display:flex;flex-direction:column;animation:fadeInModal 0.3s ease;`;
-    const headerDiv = document.createElement('div');
-    headerDiv.style.cssText = `padding:20px 16px;padding-top:max(20px, env(safe-area-inset-top));background:rgba(0,0,0,0.6);backdrop-filter:blur(20px);display:flex;align-items:center;gap:16px;border-bottom:1px solid rgba(255,255,255,0.1);`;
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '← Вернуться';
-    closeBtn.style.cssText = `background:rgba(255,255,255,0.15);border:none;padding:10px 20px;border-radius:30px;color:white;font-weight:600;font-size:16px;cursor:pointer;`;
-    closeBtn.onclick = () => modal.remove();
-    const titleSpan = document.createElement('span');
-    titleSpan.innerHTML = '📊 Отчёт FlexTime';
-    titleSpan.style.cssText = `color:white;font-weight:600;font-size:16px;`;
-    headerDiv.appendChild(closeBtn);
-    headerDiv.appendChild(titleSpan);
-    const contentDiv = document.createElement('div');
-    contentDiv.style.cssText = `flex:1;overflow:auto;padding:16px;`;
-    contentDiv.innerHTML = html;
-    modal.appendChild(headerDiv);
-    modal.appendChild(contentDiv);
-    document.body.appendChild(modal);
-    if (!document.getElementById('modal-fade-style')) {
-        const style = document.createElement('style');
-        style.id = 'modal-fade-style';
-        style.textContent = `@keyframes fadeInModal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}`;
-        document.head.appendChild(style);}}
-
-function backupData() {
-    if (h.length === 0) {alert('Нет данных для сохранения');return;}
-    const backup = {version: 2,date: new Date().toISOString(),data: h.map(record => ({id: record.id,type: record.type,date: record.date,time: record.time,note: record.note || '',fullISO: record.fullISO,timestamp: record.timestamp}))};
-    const json = JSON.stringify(backup, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');a.href = url;a.download = `flextime_backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;a.click();URL.revokeObjectURL(url);alert('✅ Резервная копия сохранена');}
-
-function restoreData() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        try {
-            const text = await file.text();
-            const backup = JSON.parse(text);
-            if (!backup.data || !Array.isArray(backup.data)) throw new Error('Неверный формат');
-            
-            const restoredData = backup.data.map(record => {
-                let fullISO = record.fullISO;
-                let timestamp = record.timestamp;
-                
-                if (!fullISO && record.date && record.time) {
-                    const dateParts = record.date.split('.');
-                    if (dateParts.length === 3) {
-                        const day = dateParts[0];
-                        const month = dateParts[1];
-                        const year = dateParts[2];
-                        const timeParts = record.time.split(':');
-                        if (timeParts.length >= 2) {
-                            const hours = timeParts[0];
-                            const minutes = timeParts[1];
-                            const seconds = timeParts[2] || '00';
-                            fullISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
-                            timestamp = new Date(fullISO).getTime();}}}
-                
-                return {id: record.id || Date.now() + Math.random(),type: record.type,date: record.date,time: record.time,note: record.note || '',fullISO: fullISO || new Date().toISOString(),timestamp: timestamp || Date.now()};});
-            if (confirm(`Восстановить ${restoredData.length} записей? Текущие данные будут заменены.`)) {h = restoredData;save();render();alert(`✅ Восстановлено ${restoredData.length} записей`);}} catch(e) {alert('Ошибка: ' + e.message);}};input.click();}
-
-function restoreFromCSV() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.csv';
-    input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        try {
-            const text = await file.text();
-            const lines = text.split('\n');
-            
-            const newRecords = [];
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                
-                const match = line.match(/(\d+),"(Приход|Уход)",([^,]+),([^,]+),"(.*)"/);
-                if (match) {
-                    const type = match[2] === 'Приход' ? 'arrive' : 'leave';
-                    const date = match[3];
-                    const time = match[4];
-                    const note = match[5] || '';
-                    
-                    const dateParts = date.split('.');
-                    const timeParts = time.split(':');
-                    let fullISO = '';
-                    let timestamp = Date.now();
-                    
-                    if (dateParts.length === 3 && timeParts.length >= 2) {
-                        const year = dateParts[2];
-                        const month = dateParts[1];
-                        const day = dateParts[0];
-                        const hours = timeParts[0];
-                        const minutes = timeParts[1];
-                        const seconds = timeParts[2] || '00';
-                        fullISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
-                        timestamp = new Date(fullISO).getTime();
+        // ========== 2. Вспомогательные функции ==========
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed)) {
+                        history = parsed;
                     }
-                    
-                    newRecords.push({
-                        id: Date.now() + Math.random() + i,
-                        type: type,
-                        date: date,
-                        time: time,
-                        note: note,
-                        fullISO: fullISO,
-                        timestamp: timestamp
+                } catch(e) {}
+            }
+            // после загрузки – сортируем по времени (от новых к старым)
+            sortHistoryByTime();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        }
+
+        // Сортировка: по fullISO (от самых новых к самым старым)
+        function sortHistoryByTime() {
+            history.sort((a, b) => {
+                const timeA = a.fullISO ? new Date(a.fullISO).getTime() : a.timestamp || 0;
+                const timeB = b.fullISO ? new Date(b.fullISO).getTime() : b.timestamp || 0;
+                return timeB - timeA;   // новые сверху
+            });
+        }
+
+        // Получить текущую дату/время в формате ДД.ММ.ГГГГ и ЧЧ:ММ:СС
+        function getCurrentDateTime() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const dateStr = `${day}.${month}.${year}`;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeStr = `${hours}:${minutes}:${seconds}`;
+            const fullISO = now.toISOString();
+            const timestamp = now.getTime();
+            return { date: dateStr, time: timeStr, fullISO: fullISO, timestamp: timestamp };
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Подсчёт отработанных часов за сегодня
+        function calculateTodayHours() {
+            const today = new Date().toLocaleDateString('ru-RU');
+            const todayEvents = history.filter(record => record.date === today);
+            let lastArrive = null;
+            let totalMinutes = 0;
+            // идём от старых к новым (чтобы правильно спарить приход-уход)
+            const sortedEvents = [...todayEvents].sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
+            for (const event of sortedEvents) {
+                if (event.type === 'arrive') {
+                    lastArrive = event;
+                } else if (event.type === 'leave' && lastArrive) {
+                    const diff = (new Date(event.fullISO) - new Date(lastArrive.fullISO)) / 60000;
+                    if (diff > 0 && diff < 720) {
+                        totalMinutes += diff;
+                    }
+                    lastArrive = null;
+                }
+            }
+            if (totalMinutes > 0) {
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = Math.floor(totalMinutes % 60);
+                return `🕘 Сегодня: ${hours}ч ${minutes}м`;
+            }
+            return `🕘 Сегодня: —`;
+        }
+
+        // ========== 3. Основные действия с записями ==========
+        function addRecord(type) {
+            const note = document.getElementById('noteInput').value.trim();
+            const { date, time, fullISO, timestamp } = getCurrentDateTime();
+            const newRecord = {
+                id: Date.now() + Math.random(),
+                type: type,        // 'arrive' или 'leave'
+                date: date,
+                time: time,
+                fullISO: fullISO,
+                timestamp: timestamp,
+                note: note
+            };
+            history.unshift(newRecord);   // сначала вставляем в начало
+            // но потом всё равно пересортируем по времени, чтобы порядок был строгий
+            sortHistoryByTime();
+            saveToLocalStorage();
+            renderHistoryList();
+            document.getElementById('noteInput').value = '';
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(50);
+            }
+        }
+
+        function deleteRecordById(id) {
+            const index = history.findIndex(r => String(r.id) === String(id));
+            if (index !== -1) {
+                history.splice(index, 1);
+                saveToLocalStorage();
+                renderHistoryList();
+                if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(50);
+                }
+            }
+        }
+
+        function clearAllRecords() {
+            if (history.length && confirm('⚠️ Удалить ВСЮ историю? Отменить нельзя.')) {
+                history = [];
+                saveToLocalStorage();
+                renderHistoryList();
+            }
+        }
+
+        // ========== 4. Редактирование записи ==========
+        function editRecord(id) {
+            const record = history.find(r => String(r.id) === String(id));
+            if (!record) return;
+
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                backdrop-filter: blur(8px);
+                z-index: 20002;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            const form = document.createElement('div');
+            form.style.cssText = `
+                background: rgba(20,30,25,0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 32px;
+                padding: 24px;
+                width: 90%;
+                max-width: 320px;
+                border: 1px solid rgba(255,255,255,0.2);
+            `;
+            form.innerHTML = `
+                <h3 style="color:white; margin-bottom:16px;">✏️ Редактировать запись</h3>
+                <label style="color:rgba(255,255,255,0.7); font-size:14px;">Дата (ДД.ММ.ГГГГ)</label>
+                <input type="text" id="editDate" value="${record.date}" style="width:100%; padding:12px; margin:8px 0 16px; border-radius:24px; border:none; background:rgba(255,255,255,0.12); color:white;">
+                <label style="color:rgba(255,255,255,0.7); font-size:14px;">Время (ЧЧ:ММ:СС)</label>
+                <input type="text" id="editTime" value="${record.time}" style="width:100%; padding:12px; margin:8px 0 16px; border-radius:24px; border:none; background:rgba(255,255,255,0.12); color:white;">
+                <label style="color:rgba(255,255,255,0.7); font-size:14px;">Заметка</label>
+                <textarea id="editNote" rows="2" style="width:100%; padding:12px; margin:8px 0 20px; border-radius:24px; border:none; background:rgba(255,255,255,0.12); color:white;">${record.note || ''}</textarea>
+                <div style="display:flex; gap:12px;">
+                    <button id="saveEditBtn" style="flex:1; background:#11998e; border:none; padding:12px; border-radius:40px; color:white; font-weight:600;">Сохранить</button>
+                    <button id="cancelEditBtn" style="flex:1; background:rgba(255,255,255,0.1); border:none; padding:12px; border-radius:40px; color:white;">Отмена</button>
+                </div>
+            `;
+            modal.appendChild(form);
+            document.body.appendChild(modal);
+
+            document.getElementById('cancelEditBtn').onclick = () => modal.remove();
+            document.getElementById('saveEditBtn').onclick = () => {
+                const newDate = document.getElementById('editDate').value.trim();
+                const newTime = document.getElementById('editTime').value.trim();
+                const newNote = document.getElementById('editNote').value.trim();
+                if (!newDate || !newTime) {
+                    alert('Дата и время обязательны');
+                    return;
+                }
+                record.date = newDate;
+                record.time = newTime;
+                record.note = newNote;
+                // пересоздаём fullISO и timestamp
+                const dateParts = newDate.split('.');
+                const timeParts = newTime.split(':');
+                if (dateParts.length === 3 && timeParts.length >= 2) {
+                    const year = dateParts[2];
+                    const month = dateParts[1];
+                    const day = dateParts[0];
+                    const hours = timeParts[0];
+                    const minutes = timeParts[1];
+                    const seconds = timeParts[2] || '00';
+                    record.fullISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+                    record.timestamp = new Date(record.fullISO).getTime();
+                }
+                sortHistoryByTime();
+                saveToLocalStorage();
+                renderHistoryList();
+                modal.remove();
+                alert('✅ Запись обновлена');
+                if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(50);
+            };
+        }
+
+        // ========== 5. Меню действий (редактировать/удалить) ==========
+        function showActionMenu(recordId) {
+            // Убираем уже существующее меню, если есть
+            const existingMenu = document.querySelector('.action-menu');
+            if (existingMenu) existingMenu.remove();
+
+            const menu = document.createElement('div');
+            menu.className = 'action-menu';
+            menu.innerHTML = `
+                <button class="edit-btn">✏️ Редактировать</button>
+                <button class="delete-btn">🗑 Удалить</button>
+            `;
+            document.body.appendChild(menu);
+
+            menu.querySelector('.edit-btn').onclick = () => {
+                menu.remove();
+                editRecord(recordId);
+            };
+            menu.querySelector('.delete-btn').onclick = () => {
+                menu.remove();
+                if (confirm('🗑 Удалить запись?')) {
+                    deleteRecordById(recordId);
+                }
+            };
+
+            // Закрыть меню при клике вне его
+            const closeHandler = (e) => {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeHandler);
+                }
+            };
+            setTimeout(() => document.addEventListener('click', closeHandler), 10);
+        }
+
+        // ========== 6. Отрисовка списка записей ==========
+        function renderHistoryList() {
+            const container = document.getElementById('logContainer');
+            const counterSpan = document.getElementById('counter');
+            const todayStatsSpan = document.getElementById('todayStats');
+
+            const total = history.length;
+            let counterText = `${total} `;
+            if (total === 1) counterText += 'запись';
+            else if (total >= 2 && total <= 4) counterText += 'записи';
+            else counterText += 'записей';
+            counterSpan.innerText = counterText;
+            todayStatsSpan.innerText = calculateTodayHours();
+
+            if (total === 0) {
+                container.innerHTML = '<div class="empty-state"><span>📭</span>История пуста</div>';
+                return;
+            }
+
+            let html = '';
+            for (let i = 0; i < history.length; i++) {
+                const record = history[i];
+                const recordNumber = history.length - i;
+                const recordClass = record.type;
+                const recordTypeText = record.type === 'arrive' ? '🏢 ПРИХОД' : '🏠 УХОД';
+                html += `
+                    <div class="log-item ${recordClass}" data-id="${record.id}">
+                        <div class="log-header">
+                            <span class="log-type ${recordClass}">${recordTypeText} #${recordNumber}</span>
+                            <span class="log-time">⏰ ${record.time}</span>
+                        </div>
+                        <div class="log-date">📅 ${record.date}</div>
+                        ${record.note ? `<div class="log-note">📝 ${escapeHtml(record.note)}</div>` : ''}
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+
+            // Обработчики на записи
+            document.querySelectorAll('.log-item').forEach(item => {
+                // Клик (левый/тап) – вызывает меню
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = item.getAttribute('data-id');
+                    showActionMenu(id);
+                });
+                // Правый клик мыши – тоже меню
+                item.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    const id = item.getAttribute('data-id');
+                    showActionMenu(id);
+                });
+            });
+        }
+
+        // ========== 7. Экспорт / импорт данных ==========
+        function exportCSV() {
+            if (!history.length) {
+                alert('Нет записей');
+                return;
+            }
+            let csv = "\uFEFF№,Тип,Дата,Время,Заметка\n";
+            history.forEach((record, index) => {
+                const typeText = record.type === 'arrive' ? 'Приход' : 'Уход';
+                const row = `${history.length - index},"${typeText}",${record.date},${record.time},"${(record.note || '').replace(/"/g, '""')}"`;
+                csv += row + "\n";
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `flextime_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function backupJSON() {
+            if (!history.length) {
+                alert('Нет данных для сохранения');
+                return;
+            }
+            const backup = {
+                version: 2,
+                date: new Date().toISOString(),
+                data: history.map(record => ({
+                    id: record.id,
+                    type: record.type,
+                    date: record.date,
+                    time: record.time,
+                    note: record.note || '',
+                    fullISO: record.fullISO,
+                    timestamp: record.timestamp
+                }))
+            };
+            const json = JSON.stringify(backup, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `flextime_backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('✅ Резервная копия сохранена');
+        }
+
+        function restoreFromJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const backup = JSON.parse(text);
+                    if (!backup.data || !Array.isArray(backup.data)) throw new Error('Неверный формат');
+                    const restoredData = backup.data.map(record => {
+                        let fullISO = record.fullISO;
+                        let timestamp = record.timestamp;
+                        if (!fullISO && record.date && record.time) {
+                            const dateParts = record.date.split('.');
+                            if (dateParts.length === 3) {
+                                const day = dateParts[0];
+                                const month = dateParts[1];
+                                const year = dateParts[2];
+                                const timeParts = record.time.split(':');
+                                if (timeParts.length >= 2) {
+                                    const hours = timeParts[0];
+                                    const minutes = timeParts[1];
+                                    const seconds = timeParts[2] || '00';
+                                    fullISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+                                    timestamp = new Date(fullISO).getTime();
+                                }
+                            }
+                        }
+                        return {
+                            id: record.id || Date.now() + Math.random(),
+                            type: record.type,
+                            date: record.date,
+                            time: record.time,
+                            note: record.note || '',
+                            fullISO: fullISO || new Date().toISOString(),
+                            timestamp: timestamp || Date.now()
+                        };
                     });
+                    if (confirm(`Восстановить ${restoredData.length} записей? Текущие данные будут заменены.`)) {
+                        history = restoredData;
+                        sortHistoryByTime();
+                        saveToLocalStorage();
+                        renderHistoryList();
+                        alert(`✅ Восстановлено ${restoredData.length} записей`);
+                    }
+                } catch(err) {
+                    alert('Ошибка: ' + err.message);
                 }
-            }
-            
-            if (newRecords.length) {
-                if (confirm(`Найдено ${newRecords.length} записей в CSV. Добавить их к текущим?`)) {
-                    h = [...newRecords, ...h];
-                    save();
-                    render();
-                    alert(`✅ Добавлено ${newRecords.length} записей из CSV`);
+            };
+            input.click();
+        }
+
+        function restoreFromCSV() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const text = await file.text();
+                    const lines = text.split('\n');
+                    const newRecords = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+                        // Регулярка: номер,"Тип",Дата,Время,"Заметка"
+                        const match = line.match(/(\d+),"(Приход|Уход)",([^,]+),([^,]+),"(.*)"/);
+                        if (match) {
+                            const type = match[2] === 'Приход' ? 'arrive' : 'leave';
+                            const date = match[3];
+                            const time = match[4];
+                            const note = match[5] || '';
+                            const dateParts = date.split('.');
+                            const timeParts = time.split(':');
+                            let fullISO = '';
+                            let timestamp = Date.now();
+                            if (dateParts.length === 3 && timeParts.length >= 2) {
+                                const year = dateParts[2];
+                                const month = dateParts[1];
+                                const day = dateParts[0];
+                                const hours = timeParts[0];
+                                const minutes = timeParts[1];
+                                const seconds = timeParts[2] || '00';
+                                fullISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+                                timestamp = new Date(fullISO).getTime();
+                            }
+                            newRecords.push({
+                                id: Date.now() + Math.random() + i,
+                                type: type,
+                                date: date,
+                                time: time,
+                                note: note,
+                                fullISO: fullISO,
+                                timestamp: timestamp
+                            });
+                        }
+                    }
+                    if (newRecords.length) {
+                        if (confirm(`Найдено ${newRecords.length} записей в CSV. Добавить их к текущим?`)) {
+                            history.push(...newRecords);
+                            sortHistoryByTime();
+                            saveToLocalStorage();
+                            renderHistoryList();
+                            alert(`✅ Добавлено ${newRecords.length} записей из CSV`);
+                        }
+                    } else {
+                        alert('Не удалось распознать CSV файл. Убедитесь, что он экспортирован из FlexTime.');
+                    }
+                } catch(err) {
+                    alert('Ошибка при чтении файла: ' + err.message);
                 }
-            } else {
-                alert('Не удалось распознать CSV файл. Убедись, что он экспортирован из FlexTime.');
+            };
+            input.click();
+        }
+
+        // ========== 8. HTML-отчёт ==========
+        function exportHTMLReport() {
+            if (history.length === 0) {
+                alert('Нет записей для экспорта');
+                return;
             }
-        } catch(e) {
-            alert('Ошибка при чтении файла: ' + e.message);
+            // Группировка по дням (ISO-дата)
+            const daysMap = new Map();
+            history.forEach(record => {
+                const isoDate = record.fullISO ? record.fullISO.slice(0,10) : null;
+                if (!isoDate) return;
+                if (!daysMap.has(isoDate)) daysMap.set(isoDate, []);
+                daysMap.get(isoDate).push(record);
+            });
+            const sortedIsoDates = Array.from(daysMap.keys()).sort();  // хронологический порядок
+            const dailyStats = [];
+            for (const isoDate of sortedIsoDates) {
+                const records = daysMap.get(isoDate);
+                const displayDate = records[0].date;
+                let lastArrive = null;
+                let totalMinutes = 0;
+                const sortedRecords = [...records].sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
+                for (const event of sortedRecords) {
+                    if (event.type === 'arrive') {
+                        lastArrive = event;
+                    } else if (event.type === 'leave' && lastArrive) {
+                        const diff = (new Date(event.fullISO) - new Date(lastArrive.fullISO)) / 60000;
+                        if (diff > 0 && diff < 720) totalMinutes += diff;
+                        lastArrive = null;
+                    }
+                }
+                const hoursNum = totalMinutes / 60;
+                const hours = Math.floor(hoursNum);
+                const minutes = Math.floor((hoursNum % 1) * 60);
+                const diff = hoursNum - 8;
+                const absDiff = Math.abs(diff);
+                const diffHours = Math.floor(absDiff);
+                const diffMins = Math.floor((absDiff % 1) * 60);
+                dailyStats.push({
+                    date: displayDate,
+                    hours: hours,
+                    minutes: minutes,
+                    hoursNum: hoursNum,
+                    diff: diff,
+                    diffText: diff === 0 ? '0' : (diff > 0 ? `+${diffHours}ч ${diffMins}м` : `-${diffHours}ч ${diffMins}м`),
+                    diffClass: diff > 0 ? 'overtime' : (diff < 0 ? 'undertime' : 'normal')
+                });
+            }
+            // разворачиваем, чтобы в отчёте новые дни были сверху
+            dailyStats.reverse();
+
+            const totalHours = dailyStats.reduce((sum, d) => sum + d.hoursNum, 0);
+            const avgHours = (totalHours / dailyStats.length).toFixed(1);
+            const totalOvertime = dailyStats.reduce((sum, d) => sum + (d.diff > 0 ? d.diff : 0), 0);
+
+            const htmlContent = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>FlexTime — Отчёт</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{background:#0a2a1a;padding:20px;font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif}.container{max-width:800px;margin:0 auto;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:32px;padding:24px;border:1px solid rgba(255,255,255,0.1)}h1{color:white;margin-bottom:8px}.sub{color:rgba(255,255,255,0.6);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1)}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}.stat-card{background:rgba(255,255,255,0.05);border-radius:20px;padding:16px;text-align:center}.stat-value{font-size:28px;font-weight:700;color:white}.stat-label{font-size:13px;color:rgba(255,255,255,0.5);margin-top:8px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08)}th{color:rgba(255,255,255,0.7);font-weight:600}.overtime{color:#4ade80;font-weight:600}.undertime{color:#f87171;font-weight:600}.normal{color:rgba(255,255,255,0.7)}.footer{color:rgba(255,255,255,0.4);font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);text-align:center}
+</style>
+</head>
+<body><div class="container">
+<h1>⏱️ FlexTime — Отчёт о рабочем времени</h1>
+<div class="sub">Период: ${dailyStats[dailyStats.length-1]?.date || '—'} — ${dailyStats[0]?.date || '—'}</div>
+<div class="stats">
+    <div class="stat-card"><div class="stat-value">${dailyStats.length}</div><div class="stat-label">Рабочих дней</div></div>
+    <div class="stat-card"><div class="stat-value">${Math.floor(totalHours)}ч ${Math.floor(totalHours%1*60)}м</div><div class="stat-label">Всего отработано</div></div>
+    <div class="stat-card"><div class="stat-value">${avgHours} ч/день</div><div class="stat-label">Средний день</div></div>
+    <div class="stat-card"><div class="stat-value">+${Math.floor(totalOvertime)}ч ${Math.floor(totalOvertime%1*60)}м</div><div class="stat-label">Переработка</div></div>
+</div>
+<table><thead><tr><th>Дата</th><th>Отработано</th><th>Отклонение от 8ч</th></tr></thead>
+<tbody>${dailyStats.map(d => `<tr><td>${d.date}${d.hours===0&&d.minutes===0?' <span style="color:#f87171">⚠️</span>':''}</td><td>${d.hours}ч ${d.minutes}м${d.hours===0&&d.minutes===0?' <span style="color:#f87171">(нет ухода?)</span>':''}</td><td class="${d.diffClass}">${d.diffText}${d.hours===0&&d.minutes===0?' (нет полной пары)':''}</td></tr>`).join('')}</tbody>
+</table>
+<div class="footer">📅 Отчёт сгенерирован ${new Date().toLocaleString('ru-RU')}<br>✅ Зелёный = переработка | ❌ Красный = недоработка</div>
+</div></body></html>`;
+
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#0a2a1a;z-index:20000;display:flex;flex-direction:column;animation:fadeInModal 0.3s ease;';
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText = 'padding:20px 16px;padding-top:max(20px, env(safe-area-inset-top));background:rgba(0,0,0,0.6);backdrop-filter:blur(20px);display:flex;align-items:center;gap:16px;border-bottom:1px solid rgba(255,255,255,0.1);';
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '← Вернуться';
+            closeBtn.style.cssText = 'background:rgba(255,255,255,0.15);border:none;padding:10px 20px;border-radius:30px;color:white;font-weight:600;font-size:16px;cursor:pointer;';
+            closeBtn.onclick = () => modal.remove();
+            const titleSpan = document.createElement('span');
+            titleSpan.innerHTML = '📊 Отчёт FlexTime';
+            titleSpan.style.cssText = 'color:white;font-weight:600;font-size:16px;';
+            headerDiv.appendChild(closeBtn);
+            headerDiv.appendChild(titleSpan);
+            const contentDiv = document.createElement('div');
+            contentDiv.style.cssText = 'flex:1;overflow:auto;padding:16px;';
+            contentDiv.innerHTML = htmlContent;
+            modal.appendChild(headerDiv);
+            modal.appendChild(contentDiv);
+            document.body.appendChild(modal);
+            if (!document.getElementById('modal-fade-style')) {
+                const style = document.createElement('style');
+                style.id = 'modal-fade-style';
+                style.textContent = '@keyframes fadeInModal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}';
+                document.head.appendChild(style);
+            }
         }
-    };
-    input.click();
-}
 
-function editRecord(id) {
-    const record = h.find(r => String(r.id) === String(id));
-    if (!record) return;
-    const modal = document.createElement('div');
-    modal.style.cssText = `position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0,0,0,0.8);backdrop-filter: blur(8px);z-index: 20002;display: flex;align-items: center;justify-content: center;`;
-    const form = document.createElement('div');
-    form.style.cssText = `background: rgba(20,30,25,0.95);backdrop-filter: blur(20px);border-radius: 32px;padding: 24px;width: 90%;max-width: 320px;border: 1px solid rgba(255,255,255,0.2);`;
-    
-    form.innerHTML = `<h3 style="color:white; margin-bottom:16px;">✏️ Редактировать запись</h3><label style="color:rgba(255,255,255,0.7); font-size:14px;">Дата (ДД.ММ.ГГГГ)</label><input type="text" id="editDate" value="${record.date}" style="width:100%; padding:12px; margin:8px 0 16px; border-radius:24px; border:none; background:rgba(255,255,255,0.12); color:white;"><label style="color:rgba(255,255,255,0.7); font-size:14px;">Время (ЧЧ:ММ:СС)</label>
-        <input type="text" id="editTime" value="${record.time}" style="width:100%; padding:12px; margin:8px 0 16px; border-radius:24px; border:none; background:rgba(255,255,255,0.12); color:white;">
-        <label style="color:rgba(255,255,255,0.7); font-size:14px;">Заметка</label>
-        <textarea id="editNote" rows="2" style="width:100%; padding:12px; margin:8px 0 20px; border-radius:24px; border:none; background:rgba(255,255,255,0.12); color:white;">${record.note || ''}</textarea>
-        <div style="display:flex; gap:12px;">
-            <button id="saveEditBtn" style="flex:1; background:#11998e; border:none; padding:12px; border-radius:40px; color:white; font-weight:600;">Сохранить</button>
-            <button id="cancelEditBtn" style="flex:1; background:rgba(255,255,255,0.1); border:none; padding:12px; border-radius:40px; color:white;">Отмена</button>
-        </div>`;
-    
-    modal.appendChild(form);
-    document.body.appendChild(modal);
-    
-    document.getElementById('cancelEditBtn').onclick = () => modal.remove();
-    document.getElementById('saveEditBtn').onclick = () => {
-        const newDate = document.getElementById('editDate').value.trim();
-        const newTime = document.getElementById('editTime').value.trim();
-        const newNote = document.getElementById('editNote').value.trim();
-        
-        if (!newDate || !newTime) {alert('Дата и время обязательны');return;}
-        
-        record.date = newDate;
-        record.time = newTime;
-        record.note = newNote;
-        
-        const dateParts = newDate.split('.');
-        const timeParts = newTime.split(':');
-        if (dateParts.length === 3 && timeParts.length >= 2) {
-            const year = dateParts[2];
-            const month = dateParts[1];
-            const day = dateParts[0];
-            const hours = timeParts[0];
-            const minutes = timeParts[1];
-            const seconds = timeParts[2] || '00';
-            record.fullISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
-            record.timestamp = new Date(record.fullISO).getTime();}
-        
-        save();
-        render();
-        modal.remove();
-        alert('✅ Запись обновлена');
-        
-        if (window.navigator?.vibrate) window.navigator.vibrate(50);
-    };
-}
+        // ========== 9. Инициализация и запуск ==========
+        function init() {
+            loadFromLocalStorage();   // загружаем данные, внутри сортировка
+            renderHistoryList();
 
-function showRecordActions(id) {
-    const existing = document.querySelector('.action-menu');
-    if (existing) existing.remove();
-    
-    const menu = document.createElement('div');
-    menu.className = 'action-menu';
-    menu.innerHTML = `
-        <button class="edit-btn">✏️ Редактировать</button>
-        <button class="delete-btn">🗑 Удалить</button>
-    `;
-    document.body.appendChild(menu);
-    
-    menu.querySelector('.edit-btn').onclick = () => {
-        menu.remove();
-        editRecord(id);
-    };
-    menu.querySelector('.delete-btn').onclick = () => {
-        menu.remove();
-        if (confirm('🗑 Удалить запись?')) deleteById(id);
-    };
-    
-    const closeHandler = (e) => {
-        if (!menu.contains(e.target)) {
-            menu.remove();
-            document.removeEventListener('click', closeHandler);
+            // Вешаем обработчики кнопок
+            document.getElementById('arriveBtn').onclick = () => addRecord('arrive');
+            document.getElementById('leaveBtn').onclick = () => addRecord('leave');
+            document.getElementById('clearBtn').onclick = clearAllRecords;
+            document.getElementById('exportReportBtn').onclick = exportHTMLReport;
+            document.getElementById('exportBtn').onclick = exportCSV;
+            document.getElementById('backupBtn').onclick = backupJSON;
+            document.getElementById('restoreBtn').onclick = restoreFromJSON;
+            document.getElementById('restoreCsvBtn').onclick = restoreFromCSV;
         }
-    };
-    setTimeout(() => document.addEventListener('click', closeHandler), 10);
-}
 
-function render() {
-    const container = document.getElementById('logContainer');
-    const counterSpan = document.getElementById('counter');
-    const todaySpan = document.getElementById('todayStats');
-    const total = h.length;
-    counterSpan.innerText = `${total} ${total===1?'запись':(total>=2&&total<=4?'записи':'записей')}`;
-    todaySpan.innerText = calculateTodayWorkHours();
-    if (!total) {
-        container.innerHTML = '<div class="empty-state"><span>📭</span>История пуста</div>';
-        return;
+        // Запускаем после загрузки страницы
+        window.addEventListener('load', () => {
+            init();
+            // Убираем экран загрузки с анимацией
+            const splash = document.getElementById('splash');
+            if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.remove();
+                }, 400);
+            }
+        });
+    })();
+
+    // Регистрация Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
     }
-    let html = '';
-    h.forEach((r,i) => {
-        const num = h.length - i;
-        const cls = r.type;
-        const txt = r.type === 'arrive' ? '🏢 ПРИХОД' : '🏠 УХОД';
-        html += `<div class="log-item ${cls}" data-id="${r.id}"><div class="log-header"><span class="log-type ${cls}">${txt} #${num}</span><span class="log-time">⏰ ${r.time}</span></div><div class="log-date">📅 ${r.date}</div>${r.note ? `<div class="log-note">📝 ${escapeHtml(r.note)}</div>` : ''}</div>`;
-    });
-    container.innerHTML = html;
-    
-    document.querySelectorAll('.log-item').forEach(item => {
-        let timer;
-        item.addEventListener('touchstart', (e) => {
-            timer = setTimeout(() => {
-                const id = item.getAttribute('data-id');
-                showRecordActions(id);
-            }, 500);
-        });
-        item.addEventListener('touchend', () => clearTimeout(timer));
-        item.addEventListener('touchmove', () => clearTimeout(timer));
-        item.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            const id = item.getAttribute('data-id');
-            showRecordActions(id);
-        });
-    });
-}
-
-function escapeHtml(t) {
-    const div = document.createElement('div');
-    div.textContent = t;
-    return div.innerHTML;
-}
-
-load();
-render();
-document.getElementById('arriveBtn').onclick = () => add('arrive');
-document.getElementById('leaveBtn').onclick = () => add('leave');
-document.getElementById('clearBtn').onclick = clearAll;
-document.getElementById('exportReportBtn').onclick = exportToHTML;
-document.getElementById('exportBtn').onclick = exportCSV;
-document.getElementById('backupBtn').onclick = backupData;
-document.getElementById('restoreBtn').onclick = restoreData;
-document.getElementById('restoreCsvBtn').onclick = restoreFromCSV;
-
-})();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>
 </body>
 </html>
