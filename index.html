@@ -11,64 +11,66 @@
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="icon" type="image/png" href="favicon.png">
     <style>
-        /* ---------- CSS ПЕРЕМЕННЫЕ (темы) ---------- */
+        /* ---------- CSS (ТЕМЫ) ---------- */
         :root {
             /* Тёмная тема (по умолчанию) */
-            --bg-gradient: radial-gradient(circle at 20% 30%, #0a2a1a, #051a0f);
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --header-bg: rgba(20, 40, 30, 0.5);
+            --bg-gradient: radial-gradient(circle at 20% 30%, #1a0a2e, #0d1b2a, #2a0d1a);
+            --card-bg: rgba(30, 20, 60, 0.25);
+            --card-border: rgba(255, 160, 80, 0.25);
+            --header-bg: rgba(20, 10, 40, 0.6);
             --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.45);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --btn-arrive-bg: linear-gradient(135deg, rgba(17,153,142,0.8), rgba(56,239,125,0.7));
-            --btn-leave-bg: linear-gradient(135deg, rgba(238,9,121,0.8), rgba(255,106,0,0.7));
-            --input-bg: rgba(255, 255, 255, 0.12);
-            --input-focus-bg: rgba(255, 255, 255, 0.2);
-            --stats-bg: rgba(255, 255, 255, 0.05);
-            --badge-bg: rgba(255, 255, 255, 0.15);
-            --clear-btn-color: #ff8a8a;
-            --clear-btn-active-bg: rgba(255, 68, 68, 0.2);
-            --log-item-bg: rgba(255, 255, 255, 0.08);
-            --log-item-border: rgba(255, 255, 255, 0.12);
-            --footer-bg: rgba(5, 26, 15, 0.95);
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --text-muted: rgba(255, 200, 150, 0.6);
+            --border-color: rgba(255, 140, 60, 0.25);
+            --btn-arrive-bg: linear-gradient(135deg, #ff8c42, #ff3b6f);
+            --btn-leave-bg: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            --input-bg: rgba(255, 255, 255, 0.08);
+            --input-focus-bg: rgba(255, 140, 66, 0.15);
+            --stats-bg: rgba(30, 20, 60, 0.3);
+            --badge-bg: rgba(139, 92, 246, 0.3);
+            --clear-btn-color: #ff8c42;
+            --clear-btn-active-bg: rgba(255, 140, 66, 0.2);
+            --log-item-bg: rgba(45, 25, 80, 0.35);
+            --log-item-border: rgba(255, 140, 66, 0.2);
+            --footer-bg: rgba(20, 10, 40, 0.85);
             --tab-btn-color: rgba(255, 255, 255, 0.7);
-            --tab-btn-active-bg: rgba(255, 255, 255, 0.1);
-            --menu-bg: rgba(20, 30, 25, 0.95);
-            --edit-color: #4ade80;
-            --delete-color: #f87171;
+            --tab-btn-active-bg: rgba(139, 92, 246, 0.3);
+            --menu-bg: rgba(30, 20, 55, 0.95);
+            --edit-color: #ff8c42;
+            --delete-color: #ff3b6f;
         }
 
         /* Светлая тема */
         body.light-theme {
-            --bg-gradient: radial-gradient(circle at 20% 30%, #d4e4d4, #b8c8b8);
+            body.light-theme {
+            --bg-gradient: radial-gradient(circle at 20% 30%, #f5f0ff, #ffe8e0);
             --card-bg: rgba(255, 255, 255, 0.7);
-            --card-border: rgba(0, 0, 0, 0.08);
-            --header-bg: rgba(200, 220, 200, 0.9);
-            --text-primary: #1a2a1a;
-            --text-secondary: #2a3a2a;
-            --text-muted: #5a6a5a;
-            --border-color: rgba(0, 0, 0, 0.08);
-            --btn-arrive-bg: linear-gradient(135deg, #11998e, #38ef7d);
-            --btn-leave-bg: linear-gradient(135deg, #ee0979, #ff6a00);
-            --input-bg: rgba(0, 0, 0, 0.05);
-            --input-focus-bg: rgba(0, 0, 0, 0.1);
-            --stats-bg: rgba(0, 0, 0, 0.05);
-            --badge-bg: rgba(0, 0, 0, 0.1);
-            --clear-btn-color: #e06060;
-            --clear-btn-active-bg: rgba(255, 68, 68, 0.15);
-            --log-item-bg: rgba(0, 0, 0, 0.04);
-            --log-item-border: rgba(0, 0, 0, 0.08);
-            --footer-bg: rgba(200, 220, 200, 0.95);
-            --tab-btn-color: rgba(0, 0, 0, 0.7);
-            --tab-btn-active-bg: rgba(0, 0, 0, 0.08);
-            --menu-bg: rgba(240, 250, 240, 0.95);
-            --edit-color: #2e7d64;
-            --delete-color: #c62828;
+            --card-border: rgba(139, 92, 246, 0.2);
+            --header-bg: rgba(255, 255, 255, 0.8);
+            --text-primary: #2d1b4e;
+            --text-secondary: #5a3d8c;
+            --text-muted: #9a7bcb;
+            --border-color: rgba(139, 92, 246, 0.15);
+            --btn-arrive-bg: linear-gradient(135deg, #ff8c42, #ff3b6f);
+            --btn-leave-bg: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            --input-bg: rgba(0, 0, 0, 0.03);
+            --input-focus-bg: rgba(139, 92, 246, 0.1);
+            --stats-bg: rgba(0, 0, 0, 0.03);
+            --badge-bg: rgba(139, 92, 246, 0.15);
+            --clear-btn-color: #d94a2a;
+            --clear-btn-active-bg: rgba(255, 140, 66, 0.12);
+            --log-item-bg: rgba(139, 92, 246, 0.06);
+            --log-item-border: rgba(139, 92, 246, 0.12);
+            --footer-bg: rgba(255, 245, 250, 0.9);
+            --tab-btn-color: #4a2a6a;
+            --tab-btn-active-bg: rgba(139, 92, 246, 0.15);
+            --menu-bg: rgba(255, 255, 255, 0.95);
+            --edit-color: #e06e1a;
+            --delete-color: #d93662;
+}
         }
 
-        /* ---------- Базовые сбросы ---------- */
+        /* ---------- База ---------- */
         * {
             margin: 0;
             padding: 0;
@@ -341,18 +343,18 @@
             letter-spacing: 0.01875rem;
         }
         .log-type.arrive {
-            color: #38ef7d;
-            border-left: 0.125rem solid #38ef7d;
+            color: #ffaa66;
+            border-left: 0.125rem solid #ff8c42;
         }
         body.light-theme .log-type.arrive {
-            color: #1a7a5a;
+            color: #d95a1a;
         }
         .log-type.leave {
-            color: #ff9e7a;
-            border-left: 0.125rem solid #ff6a00;
+            color: #a78bfa;
+            border-left: 0.125rem solid #8b5cf6;
         }
         body.light-theme .log-type.leave {
-            color: #c62828;
+            color: #6d4bcb;
         }
         .log-time {
             font-size: 1.125rem;
@@ -587,7 +589,7 @@
 
         // Сортировка по времени создания (новые сверху)
         function sortHistoryByTime() {
-            history.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            history.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         }
 
         // Получить текущую дату/время
@@ -996,7 +998,38 @@
             const htmlContent = `<!DOCTYPE html>
             <html>
             <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>FlexTime — Отчёт</title>
-            <style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a2a1a;padding:20px;font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif}.container{max-width:800px;margin:0 auto;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:32px;padding:24px;border:1px solid rgba(255,255,255,0.1)}h1{color:white;margin-bottom:8px}.sub{color:rgba(255,255,255,0.6);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1)}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}.stat-card{background:rgba(255,255,255,0.05);border-radius:20px;padding:16px;text-align:center}.stat-value{font-size:28px;font-weight:700;color:white}.stat-label{font-size:13px;color:rgba(255,255,255,0.5);margin-top:8px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.08)}th{color:rgba(255,255,255,0.7);font-weight:600}.overtime{color:#4ade80;font-weight:600}.undertime{color:#f87171;font-weight:600}.normal{color:rgba(255,255,255,0.7)}.footer{color:rgba(255,255,255,0.4);font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);text-align:center}</style>
+                <style>
+                    *{margin:0;padding:0;box-sizing:border-box}
+                    body{
+                        background: radial-gradient(circle at 20% 30%, #1a0a2e, #0d1b2a, #2a0d1a);
+                        padding:20px;
+                        font-family:-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+                        min-height:100vh;
+                    }
+                    .container{
+                        max-width:800px;
+                        margin:0 auto;
+                        background:rgba(30,20,60,0.35);
+                        backdrop-filter:blur(20px);
+                        border-radius:32px;
+                        padding:24px;
+                        border:1px solid rgba(255,140,66,0.3);
+                    }
+                    h1{color:#ffaa66;margin-bottom:8px}
+                    .sub{color:rgba(255,200,150,0.7);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(255,140,66,0.3)}
+                    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+                    .stat-card{background:rgba(255,255,255,0.05);border-radius:20px;padding:16px;text-align:center}
+                    .stat-value{font-size:28px;font-weight:700;color:white}
+                    .stat-label{font-size:13px;color:rgba(255,200,150,0.7);margin-top:8px}
+                    table{width:100%;border-collapse:collapse}
+                    th,td{padding:12px;text-align:left;border-bottom:1px solid rgba(255,140,66,0.2)}
+                    th{color:#ffaa66;font-weight:600}
+                    .overtime{color:#ffaa66;font-weight:600}
+                    .undertime{color:#ff7b9c;font-weight:600}
+                    .normal{color:rgba(255,255,255,0.7)}
+                    .footer{color:rgba(255,200,150,0.5);font-size:12px;margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,140,66,0.2);text-align:center}
+                    .theme-notice{text-align:center;margin-top:16px;font-size:11px;color:rgba(255,200,150,0.4)}
+                </style>
             </head>
             <body><div class="container">
             <h1>⏱️ FlexTime — Отчёт о рабочем времени</h1>
