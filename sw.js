@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flextime-v3.4';
+const CACHE_NAME = 'flextime-v3.3';
 const urlsToCache = [
     '/',
     '/index.html',
