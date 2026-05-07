@@ -615,27 +615,39 @@
 
         // Подсчёт часов за сегодня
         function calculateTodayHours() {
-            const today = new Date().toLocaleDateString('ru-RU');
-            const todayEvents = history.filter(r => r.date === today);
-            let lastArrive = null;
-            let totalMinutes = 0;
-            const sortedEvents = [...todayEvents].sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
-            for (const event of sortedEvents) {
-                if (event.type === 'arrive') {
-                    lastArrive = event;
-                } else if (event.type === 'leave' && lastArrive) {
-                    const diff = (new Date(event.fullISO) - new Date(lastArrive.fullISO)) / 60000;
-                    if (diff > 0 && diff < 720) totalMinutes += diff;
-                    lastArrive = null;
-                }
+    const today = new Date().toLocaleDateString('ru-RU');
+    const todayEvents = history.filter(record => record.date === today);
+    if (todayEvents.length === 0) return `🕘 Сегодня: —`;
+
+    // Создаём массив пар (приход, уход) последовательно
+    let totalMinutes = 0;
+    let lastArrive = null;
+
+    // Сортируем по времени (timestamp) – от ранних к поздним
+    const sorted = [...todayEvents].sort((a,b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+    for (const event of sorted) {
+        if (event.type === 'arrive') {
+            lastArrive = event;
+        } else if (event.type === 'leave' && lastArrive) {
+            const leaveTime = new Date(event.fullISO).getTime();
+            const arriveTime = new Date(lastArrive.fullISO).getTime();
+            const diffMinutes = (leaveTime - arriveTime) / 60000;
+            if (diffMinutes > 0 && diffMinutes < 720) { // не более 12 часов
+                totalMinutes += diffMinutes;
             }
-            if (totalMinutes > 0) {
-                const hours = Math.floor(totalMinutes / 60);
-                const minutes = Math.floor(totalMinutes % 60);
-                return `🕘 Сегодня: ${hours}ч ${minutes}м`;
-            }
-            return `🕘 Сегодня: —`;
+            lastArrive = null; // сбрасываем после спаривания
         }
+    }
+
+    // Если остался «висячий» приход без ухода – не добавляем ничего
+    if (totalMinutes > 0) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = Math.floor(totalMinutes % 60);
+        return `🕘 Сегодня: ${hours}ч ${minutes}м`;
+    }
+    return `🕘 Сегодня: —`;
+}
 
         // ========== 2. Основные действия ==========
         function addRecord(type) {
