@@ -800,56 +800,67 @@
             setTimeout(() => document.addEventListener('click', closeHandler), 10);
         }
 
-        // ========== 4. Отрисовка списка ==========
-        function renderHistoryList() {
-            const container = document.getElementById('logContainer');
-            const counterSpan = document.getElementById('counter');
-            const todayStatsSpan = document.getElementById('todayStats');
-            const total = history.length;
-            let counterText = `${total} `;
-            if (total === 1) counterText += 'запись';
-            else if (total >= 2 && total <= 4) counterText += 'записи';
-            else counterText += 'записей';
-            counterSpan.innerText = counterText;
-            todayStatsSpan.innerText = calculateTodayHours();
+        // ========== 4. Отрисовка списка и сортировка по времени ==========
+function renderHistoryList() {
+    const container = document.getElementById('logContainer');
+    const counterSpan = document.getElementById('counter');
+    const todayStatsSpan = document.getElementById('todayStats');
 
-            if (total === 0) {
-                container.innerHTML = '<div class="empty-state"><span>📭</span>История пуста</div>';
-                return;
-            }
+    // Создаём отсортированную копию (новые записи сверху)
+    const sorted = [...history].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const total = sorted.length;
 
-            let html = '';
-            for (let i = 0; i < history.length; i++) {
-                const record = history[i];
-                const recordNumber = history.length - i;
-                const recordClass = record.type;
-                const recordTypeText = record.type === 'arrive' ? '🏢 ПРИХОД' : '🏠 УХОД';
-                html += `
-                    <div class="log-item ${recordClass}" data-id="${record.id}">
-                        <div class="log-header">
-                            <span class="log-type ${recordClass}">${recordTypeText} #${recordNumber}</span>
-                            <span class="log-time">⏰ ${record.time}</span>
-                        </div>
-                        <div class="log-date">📅 ${record.date}</div>
-                        ${record.note ? `<div class="log-note">📝 ${escapeHtml(record.note)}</div>` : ''}
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
+    // Счётчик
+    let counterText = `${total} `;
+    if (total === 1) counterText += 'запись';
+    else if (total >= 2 && total <= 4) counterText += 'записи';
+    else counterText += 'записей';
+    counterSpan.innerText = counterText;
+    todayStatsSpan.innerText = calculateTodayHours();
 
-            document.querySelectorAll('.log-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const id = item.getAttribute('data-id');
-                    showActionMenu(id);
-                });
-                item.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    const id = item.getAttribute('data-id');
-                    showActionMenu(id);
-                });
-            });
-        }
+    if (total === 0) {
+        container.innerHTML = '<div class="empty-state"><span>📭</span>История пуста</div>';
+        return;
+    }
+
+    let html = '';
+    for (let i = 0; i < sorted.length; i++) {
+        const record = sorted[i];
+        const recordNumber = sorted.length - i; // нумерация: новые — большие номера
+        const recordClass = record.type;
+        const recordTypeText = record.type === 'arrive' ? '🏢 ПРИХОД' : '🏠 УХОД';
+        html += `
+            <div class="log-item ${recordClass}" data-id="${record.id}">
+                <div class="log-header">
+                    <span class="log-type ${recordClass}">${recordTypeText} #${recordNumber}</span>
+                    <span class="log-time">⏰ ${record.time}</span>
+                </div>
+                <div class="log-date">📅 ${record.date}</div>
+                ${record.note ? `<div class="log-note">📝 ${escapeHtml(record.note)}</div>` : ''}
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+
+    // Обработчики кликов (меню редактирования/удаления)
+    document.querySelectorAll('.log-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = item.getAttribute('data-id');
+            showActionMenu(id);
+        });
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const id = item.getAttribute('data-id');
+            showActionMenu(id);
+        });
+    });
+}
+
+// ========== Сортировка массива (для внутреннего использования, не влияет на отрисовку) ==========
+function sortHistoryByTime() {
+    history.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+}
 
         // ========== 5. Тема (светлая/тёмная) ==========
         function initTheme() {
