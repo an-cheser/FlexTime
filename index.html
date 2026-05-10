@@ -440,6 +440,17 @@
         }
         .log-item { animation: slideIn 0.25s ease; }
     </style>
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+<script>
+    if (window.location !== window.parent.location) {
+        // Дождёмся загрузки библиотеки и проинициализируем соединение
+        window.onload = function() {
+            if (typeof vkBridge !== 'undefined') {
+                vkBridge.send('VKWebAppInit');
+            }
+        };
+    }
+</script>
 </head>
 <body>
 
